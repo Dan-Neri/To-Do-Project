@@ -74,6 +74,7 @@ Running Instructions:
             navigate to http://localhost:3001/api
         3. You should see a message 'The API is running' if everything
             is working correctly
+            
     Start the App:
         1. Open a new terminal window, navigate to the location of this
             repository and enter the following commands:
