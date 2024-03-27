@@ -8,6 +8,7 @@ test out the app for yourself. Feel free message me at
 DanMNeri@gmail.com with any feedback for this project. 
 
 Setup Instructions:
+
     Download and install Node.js v20.11.1 and npm 10.2.4:
         1. https://nodejs.org/en/download
         2. install on your system
@@ -65,6 +66,7 @@ Setup Instructions:
             unless you are using your own database.
     
 Running Instructions:
+
     Start the API:
         1. Open the terminal on your pc, navigate to the location of 
             this repository and enter the following commands:
