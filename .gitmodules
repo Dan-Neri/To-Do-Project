@@ -1,0 +1,6 @@
+[submodule "to-do-api"]
+	path = to-do-api
+	url = D:/Program Files/Git/to-do-api
+[submodule "to-do-app"]
+	path = to-do-app
+	url = D:/Program Files/Git/to-do-app
