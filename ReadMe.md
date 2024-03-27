@@ -49,7 +49,7 @@ Setup Instructions:
     Configure the .env file:
         The .env file contains details on how to connect to the 
         Database. This will be specific to your configuration. I have
-        Included an example file called '- Copy.env' which shows how 
+        Included an example file called '.envcopy' which shows how 
         this file should look. You will need to edit this file, provide 
         the connection details for your Database server, and then save
         the file as '.env' in the /to-do-api folder. If you are planning
@@ -62,8 +62,8 @@ Setup Instructions:
         - DB_USERNAME - The username of the database owner account
             - postgres (default)
         - DB_PASSWORD - The password of the database owner account
-        - DB_NAME - The name of the database. Leave this as 'To-DoDB'
-            unless you are using your own database.
+        - DB_NAME - The name of the database. Set this as 'To-DoDB'
+            unless you have a different database that you are using.
     
 Running Instructions:
 
