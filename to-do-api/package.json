@@ -1,8 +1,8 @@
 {
   "name": "to-do-api",
   "version": "0.0.1",
-  "description": "",
-  "author": "",
+  "description": "The back-end API for Dan's To-Do List",
+  "author": "Dan Neri",
   "private": true,
   "license": "UNLICENSED",
   "scripts": {

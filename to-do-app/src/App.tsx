@@ -20,11 +20,11 @@ function App() {
     ]);
     async function clickHandle() {
         //Send a Post request to the API to create a new user.
-        await axios.post('/users/create', {
-                firstName: 'Dan',
-                lastName: 'Neri',
-                username: 'dneri'
-        })
+    await axios.post('/users/create', {
+        firstName: 'Dan',
+        lastName: 'Neri',
+        username: 'dneri'
+    })
         .then(function (response) {
             setValue('Data sent to database')
         })

@@ -26,25 +26,15 @@ Setup Instructions:
           - postgres (default)
         9. Click Save
         
-    Install ChakraUI:
+    Install Front-End Dependecies:
         1. Open the terminal on your pc, navigate to the location of 
             this repository and enter the following commands:
           - cd /to-do-app
-          - npm i @chakra-ui/react @emotion/react @emotion/styled framer-motion
+          - npm install
         
-    Install Axios:
-          - npm install axios
-        
-    Install NestJS:
-          - cd ../
-          - npm i -g @nestjs/cli
-        
-    Install TypeORM:
-          - cd /to-do-api
-          - npm install --save @nestjs/typeorm typeorm pg
-          
-    Install DotENV:
-          - npm install dotenv
+    Install Back-End Dependencies:
+          - cd ../to-do-api
+          - npm install
           
     Configure the .env file:
         The .env file contains details on how to connect to the 
@@ -71,7 +61,7 @@ Running Instructions:
         1. Open the terminal on your pc, navigate to the location of 
             this repository and enter the following commands:
           - cd /to-do-api
-          - npm run Start
+          - npm start
         2. Leave the terminal window open, open a browser window, and  
             navigate to http://localhost:3001/api
         3. You should see a message 'The API is running' if everything

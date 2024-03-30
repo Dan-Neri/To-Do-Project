@@ -47,7 +47,6 @@ function getENV(key: string): string {
             password: DB_PASS,
             database: DB_NAME,
             autoLoadEntities: true,
-            synchronize: true,
         }),
         //Responsible for handling all user requests at api/users/
         UsersModule,
