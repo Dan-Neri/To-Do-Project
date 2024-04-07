@@ -1,5 +1,5 @@
-This is a to do list application which was created for the To-Do list
-fullstack development workshop at http://coding-with-callie.com. It 
+This is a project planning application which was created for the To-Do 
+list fullstack development workshop at http://coding-with-callie.com. It 
 consists of a front-end UI, a back-end API, and a database. The UI is
 built with React, TypeScript, and ChakraUI. The API is built with NestJS
 utilizing TypeORM. I am using a Trello board which will track the status
@@ -60,6 +60,9 @@ Setup Instructions:
         - DB_PASSWORD - The password of the database owner account
         - DB_NAME - The name of the database. Set this as 'To-DoDB'
             unless you have a different database that you are using.
+        - JWT_SECRET - This is the secret key that will be used to
+            generate JWTs. I recommend generating a random key. I used
+            crypto.randomBytes(length).toString('hex').
     
 Running Instructions:
 
