@@ -2,10 +2,16 @@ This is a to do list application which was created for the To-Do list
 fullstack development workshop at http://coding-with-callie.com. It 
 consists of a front-end UI, a back-end API, and a database. The UI is
 built with React, TypeScript, and ChakraUI. The API is built with NestJS
-utilizing TypeORM. Check 'Setup Instructions' for details on how to
-install and configure the project. Then follow 'Running Instructions' to
-test out the app for yourself. Feel free message me at 
-DanMNeri@gmail.com with any feedback for this project. 
+utilizing TypeORM. I am using a Trello board which will track the status
+of the project and where I am with development. I will keep this board
+updated as I work through the project. You can find this board with the
+most recent project information at:
+https://trello.com/b/Yb5IJhSJ/to-do-list.
+
+Check 'Setup Instructions' below for details on how to install and 
+configure the project. Then follow 'Running Instructions' to test out 
+the app for yourself. Feel free message me at DanMNeri@gmail.com with 
+any feedback for this project. 
 
 Setup Instructions:
 
