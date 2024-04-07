@@ -12,30 +12,21 @@ import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { User } from '../users/user.entity';
+import { Password } from '../users/password.entity';
 import { UsersModule } from '../users/users.module';
 import { UsersController } from '../users/users.controller';
 import { UsersService } from '../users/users.service';
-import * as dotenv from 'dotenv';
-
-dotenv.config()
+import { AuthModule } from '../auth/auth.module';
+import { AuthController } from '../auth/auth.controller';
+import { AuthService } from '../auth/auth.service';
+import GetENV from './getENV';
 
 //Load from the .env file
-const DB_HOST: string = getENV('DB_HOST');
-const DB_PORT: number = Number(getENV('DB_PORT'));
-const DB_USER: string = getENV('DB_USERNAME');
-const DB_PASS: string = getENV('DB_PASSWORD');
-const DB_NAME: string = getENV('DB_NAME');
-
-/*
-    Check to make sure the specified environmental variable exists in 
-    the .env file and throw an exception otherwise.
-*/
-function getENV(key: string): string {
-    if (process.env[key] === undefined) {
-        throw ReferenceError(`Environmental variable missing: ${key}`);
-    }
-    return process.env[key] as string;
-}
+const DB_HOST: string = GetENV('DB_HOST');
+const DB_PORT: number = Number(GetENV('DB_PORT'));
+const DB_USER: string = GetENV('DB_USERNAME');
+const DB_PASS: string = GetENV('DB_PASSWORD');
+const DB_NAME: string = GetENV('DB_NAME');
 
 @Module({
     imports: [
@@ -46,10 +37,12 @@ function getENV(key: string): string {
             username: DB_USER,
             password: DB_PASS,
             database: DB_NAME,
-            autoLoadEntities: true,
+            entities: [User],
+            synchronize: true
         }),
         //Responsible for handling all user requests at api/users/
         UsersModule,
+        AuthModule
     ],
     controllers: [AppController],
     providers: [AppService],

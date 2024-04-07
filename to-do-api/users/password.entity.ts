@@ -8,22 +8,13 @@ import {
 } from 'typeorm';
 
 @Entity()
-export class User {
+export class Password {
     @PrimaryGeneratedColumn('uuid')
     id: number;
 
     @Column('varchar')
-    firstName: string;
+    salt: string;
 
     @Column('varchar')
-    lastName: string;
-  
-    @Column('varchar')
-    username: string;
-    
-    @Column('varchar')
-    password: string;
-    
-    @Column({type: 'bool', default: true })
-    isActive: boolean;
+    hash: string;
 }

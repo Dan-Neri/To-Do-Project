@@ -3,3 +3,4 @@ DB_PORT=port
 DB_USERNAME=username
 DB_PASSWORD=password
 DB_NAME=dbname
+JWT_SECRET=secret
