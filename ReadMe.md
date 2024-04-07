@@ -8,6 +8,17 @@ updated as I work through the project. You can find this board with the
 most recent project information at:
 https://trello.com/b/Yb5IJhSJ/to-do-list.
 
+The status of the project right now:
+Account_Creation branch:
+    - Pull request open
+    - Users are able to create an account, sign-in and sign out.
+    - If you are reviewing this for feature 1, check that the project
+        can be installed and run with the provided instructions and that
+        you are able to create an account, login to that account, and 
+        view your username in the menu bar at the top. Then check to
+        make sure that you an sign out of the account and the name
+        changes to 'Guest'.
+
 Check 'Setup Instructions' below for details on how to install and 
 configure the project. Then follow 'Running Instructions' to test out 
 the app for yourself. Feel free message me at DanMNeri@gmail.com with 
