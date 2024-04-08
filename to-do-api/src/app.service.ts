@@ -3,7 +3,6 @@
  * string stating that the API is running.
  */
 import { Injectable } from '@nestjs/common';
-import { CreateUserDTO } from '../users/CreateUser.dto';
 
 @Injectable()
 export class AppService {

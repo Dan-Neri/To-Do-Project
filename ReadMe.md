@@ -1,11 +1,28 @@
-This is a to do list application which was created for the To-Do list
-fullstack development workshop at http://coding-with-callie.com. It 
+This is a project planning application which was created for the To-Do 
+list fullstack development workshop at http://coding-with-callie.com. It 
 consists of a front-end UI, a back-end API, and a database. The UI is
 built with React, TypeScript, and ChakraUI. The API is built with NestJS
-utilizing TypeORM. Check 'Setup Instructions' for details on how to
-install and configure the project. Then follow 'Running Instructions' to
-test out the app for yourself. Feel free message me at 
-DanMNeri@gmail.com with any feedback for this project. 
+utilizing TypeORM. I am using a Trello board which will track the status
+of the project and where I am with development. I will keep this board
+updated as I work through the project. You can find this board with the
+most recent project information at:
+https://trello.com/b/Yb5IJhSJ/to-do-list.
+
+The status of the project right now:
+Account_Creation branch:
+    - Pull request open
+    - Users are able to create an account, sign-in and sign out.
+    - If you are reviewing this for feature 1, check that the project
+        can be installed and run with the provided instructions and that
+        you are able to create an account, login to that account, and 
+        view your username in the menu bar at the top. Then check to
+        make sure that you an sign out of the account and the name
+        changes to 'Guest'.
+
+Check 'Setup Instructions' below for details on how to install and 
+configure the project. Then follow 'Running Instructions' to test out 
+the app for yourself. Feel free message me at DanMNeri@gmail.com with 
+any feedback for this project. 
 
 Setup Instructions:
 
@@ -54,6 +71,9 @@ Setup Instructions:
         - DB_PASSWORD - The password of the database owner account
         - DB_NAME - The name of the database. Set this as 'To-DoDB'
             unless you have a different database that you are using.
+        - JWT_SECRET - This is the secret key that will be used to
+            generate JWTs. I recommend generating a random key. I used
+            crypto.randomBytes(length).toString('hex').
     
 Running Instructions:
 
