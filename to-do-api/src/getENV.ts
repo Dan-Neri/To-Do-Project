@@ -1,6 +1,7 @@
 /**
- *   Check to make sure the specified environmental variable exists in 
- *   the .env file and throw an exception otherwise.
+ * The GetENV method provides and easy way to ensure that the required
+ * enviromental variables exist in the .env file. This method is
+ * exported to be used across the API for .env variable loads.
  */
  import * as dotenv from 'dotenv';
 

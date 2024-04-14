@@ -9,9 +9,9 @@ import { AppModule } from './app.module';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  //Set the root folder
+  //Set the root folder. All other api routes are prepended with /api.
   app.setGlobalPrefix('api');
-  //Allow requests from the UI
+  //Allow requests from the UI.
   app.enableCors({'origin': 'http://localhost:3000'});
   await app.listen(3001);
 }

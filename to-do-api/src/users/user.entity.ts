@@ -1,11 +1,13 @@
 /**
- * Defines the User Entity which corresponds to a table in the database.
+ * Defines the User entity which corresponds to a table in the database.
  */
 import { 
     Entity, 
     Column, 
-    PrimaryGeneratedColumn
+    PrimaryGeneratedColumn,
+    OneToMany
 } from 'typeorm';
+import { Project } from '../project/project.entity';
 
 @Entity()
 export class User {
@@ -22,7 +24,13 @@ export class User {
     username: string;
     
     @Column('varchar')
+    email: string;
+    
+    @Column('varchar')
     password: string;
+    
+    @OneToMany((type) => Project, (project) => project.user)
+    projects: Project[];
     
     @Column({type: 'bool', default: true })
     isActive: boolean;
