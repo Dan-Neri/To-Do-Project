@@ -19,12 +19,12 @@ import TopMenu from './routes/top-menu';
 import Index from './routes/index';
 import SignUp, { action as signUpAction } from './routes/sign-up';
 import SignIn from './routes/sign-in';
-import UserAccount, { 
-    loader as userAccountLoader 
-} from './routes/user-account';
+import ResetPassword from './routes/reset-password';
+import UserAccount from './routes/user-account';
 
+//Set the baseURL which will prepend all other axios calls.
 axios.defaults.baseURL = 'http://localhost:3001/api';
-    
+      
 const router = createBrowserRouter(
     createRoutesFromElements(
         <Route 
@@ -49,7 +49,10 @@ const router = createBrowserRouter(
                 <Route
                     path='/account/:userID'
                     element={<UserAccount />}
-                    loader={userAccountLoader}
+                />
+                <Route
+                    path='/account/:userID/pw-reset/:token'
+                    element={<ResetPassword />}
                 />
             </Route>
         </Route>

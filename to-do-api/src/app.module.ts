@@ -4,21 +4,15 @@
  * the TypeORMModule to facilitate communication with the database. It
  * also imports all other modules across the API along with a simple
  * controller and provider, AppController and AppService, to handle
- * direct request to the API.
+ * direct requests made to http:/localhost/api.
  */
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { DataSource } from 'typeorm';
-import { User } from '../users/user.entity';
-import { Password } from '../users/password.entity';
-import { UsersModule } from '../users/users.module';
-import { UsersController } from '../users/users.controller';
-import { UsersService } from '../users/users.service';
-import { AuthModule } from '../auth/auth.module';
-import { AuthController } from '../auth/auth.controller';
-import { AuthService } from '../auth/auth.service';
+import { UsersModule } from './users/users.module';
+import { AuthModule } from './auth/auth.module';
+import { EmailModule } from './email/email.module';
 import GetENV from './getENV';
 
 //Load from the .env file
@@ -37,11 +31,11 @@ const DB_NAME: string = GetENV('DB_NAME');
             username: DB_USER,
             password: DB_PASS,
             database: DB_NAME,
-            entities: [User],
+            autoLoadEntities: true,
             synchronize: true
         }),
-        //Responsible for handling all user requests at api/users/
         UsersModule,
+        EmailModule,
         AuthModule
     ],
     controllers: [AppController],
