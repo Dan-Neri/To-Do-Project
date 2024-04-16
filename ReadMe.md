@@ -62,13 +62,12 @@ out the app for yourself. Feel free message me at
             this project. I used 'to-do project'.
         3. cd ${name}
         4. git remote add origin https://github.com/Dan-Neri/To-Do-Project.git
-        5. git fetch origin refs/pull/${PR}/head
-            --where ${PR} is the pull request number. You can find
-            the number at the top of the pull request page. If you
-            are reviewing feature 1, this should be 1.
-        6. git checkout -b ${branch} FETCH_HEAD
-            --where ${branch} is the name of the new branch that you
-            want to create.
+        5. git fetch origin refs/pull/${PR#}/head:${branch}
+            --where ${PR#} is the pull request number and ${branch} is
+            the name of the branch you want to pull. You can find this
+            information at the top of the pull request page.
+            -ex. git fetch origin refs/pull/2/account_update
+        6. git checkout ${branch}
 
 #### Download and install Node.js v20.11.1 and npm 10.2.4:
     1. Download NodeJS: https://nodejs.org/en/download
