@@ -15,7 +15,6 @@ import {
 import { UsersService } from './users.service';
 import { CreateUserDTO } from './create-user.dto';
 import { UpdateUserDTO } from './update-user.dto';
-import { GetUserDTO } from './get-user.dto';
 import { User } from './user.entity';
 import { AuthGuard, RequestWithUser } from '../auth/auth.guard';
 
@@ -23,7 +22,7 @@ import { AuthGuard, RequestWithUser } from '../auth/auth.guard';
 export class UsersController {
     constructor(private readonly usersService: UsersService) {}
     
-    /*Take a user id in the request header and return the matching 
+    /*Take an access token in the request header and return the matching 
     account information. Throw an error if a matching user is not found
     or the JWT is invalid.*/
     @UseGuards(AuthGuard)
@@ -39,22 +38,21 @@ export class UsersController {
     the resultant user object. Throw an error if a user already exists
     with the given username or email address.*/
     @Post('create')
-    create(@Body() body: CreateUserDTO): Promise<Partial<User>> {
-        return this.usersService.create(body);
+    create(@Body() DTO: CreateUserDTO): Promise<Partial<User>> {
+        return this.usersService.create(DTO);
     }
     
-    /*Take new user information in the request body along with a user id
-    and JWT in the request header. Update the specified informaiton in
-    the matching user's account and return a user object with the
-    updated information. Throw an error if a matching user is not found,
-    the JWT is invalid, or the given email address or username is
-    already taken.*/
+    /*Take an access token in the request header and new user data in 
+    the request body. Update the specified information in the matching 
+    user's account. Return a user object with the updated information. 
+    Throw an error if a matching user is not found, the JWT is invalid, 
+    or the given email address or username is already taken.*/
     @UseGuards(AuthGuard)
     @Post('update')
     update(
         @Request() req: RequestWithUser, 
-        @Body() body: UpdateUserDTO
+        @Body() DTO: UpdateUserDTO
     ): Promise<Partial<User>> {
-        return this.usersService.update(req.user.sub, body);
+        return this.usersService.update(req.user.sub, DTO);
     }
 }

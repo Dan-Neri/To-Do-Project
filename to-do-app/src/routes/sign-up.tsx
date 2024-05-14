@@ -1,10 +1,9 @@
 /**
- * The SignUp route allows new users to create an account by sending a
- * Post request to the API.
+ * The SignUp route allows new users to create an account by sending
+ * their data to the back-end API.
  */
-import React, { ChangeEvent, useState, FormEvent } from 'react';
+import { ChangeEvent, useState, FormEvent } from 'react';
 import { 
-    Box, 
     Input, 
     Button,
     HStack,
@@ -17,19 +16,23 @@ import {
     useToast
 } from '@chakra-ui/react';
 import { Link, Form, useNavigate } from 'react-router-dom';
-import axios, {AxiosResponse, AxiosError } from 'axios';
+import axios from 'axios';
 import { UserSignIn } from '../api/calls';
 import Dialog from '../components/dialog';
 import Page from '../components/page';
-import { StatusType } from '../types/types';
+import { StatusType, CreateUserDTO } from '../types/types';
 
 export default function SignUp() {
+    //Track the contents of the password field.
     const [password, setPassword] = useState('');
+    //Track the contents of the confirm password field.
     const [confirmPass, setConfirmPass] = useState('');
+    //Track if the password and confirm password fields match.
     const [passMatch, setPassMatch] = useState(false);
+    //Track whether to obfuscate the password field or not.
     const [showPassword, setShowPassword] = useState(false);
+    //Track whether to obfuscate the confirm password field or not.
     const [showConfirmPass, setShowConfirmPass] = useState(false);
-    const [dialogOpen, setDialogOpen] = useState(false);
     const navigate = useNavigate();
     const toast = useToast();
     
@@ -49,30 +52,38 @@ export default function SignUp() {
         setPassMatch(newConfirmPass === password);
     };
     
-    /*Send the form data to the APi to create a new user, log in as that
-    new user, and save the resulting JWT in a cookie*/
+    /*Send the form data to the API to create a new user, log in as that
+    new user, and save the resulting JWT in a cookie.*/
     const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+        /*Prevent the form from sending a POST request which would 
+        refresh the page needlessly.*/
         event.preventDefault();
+        //Get the user data from the form.
         const formData = new FormData(event.currentTarget as HTMLFormElement);
         const firstName = formData.get('fName') as string;
         const lastName = formData.get('lName') as string;
         const email = formData.get('email') as string;
         const username = formData.get('uName') as string;
-        //Send a Post request to the API to create a new user.
-        try {
-            const response = await axios.post('/users/create', {
-                firstName: (
+        /*Format the user data and create a data transfer object to send
+        with our request.*/
+        const DTO: CreateUserDTO = {
+            firstName: (
                     firstName[0].toUpperCase() + 
                     firstName.substring(1).toLowerCase()
                 ),
-                lastName: (
+            lastName: (
                     lastName[0].toUpperCase() + 
                     lastName.substring(1).toLowerCase()
                 ),
-                email: email.toLowerCase(),
-                username: username.toLowerCase(),
-                password: password
-            })
+            email: email.toLowerCase(),
+            username: username.toLowerCase(),
+            password: password
+        }
+        
+        try {
+            /*Send a request to create a new user to the API with the user 
+            data in the body.*/
+            const response = await axios.post('/users/create', DTO);
         }
         catch (error: any) {
             if(error.response) {
@@ -95,10 +106,9 @@ export default function SignUp() {
             return;
         }
         try {
-            const signInResponse = await UserSignIn(
-                formData.get('uName') as string, 
-                formData.get('password') as string
-            );
+            /*Send a request to the API to sign in the user with their
+            username and password.*/
+            const signInResponse = await UserSignIn(username, password);
             if (!signInResponse) {
                 toast({
                     title: 'Error',
@@ -109,7 +119,8 @@ export default function SignUp() {
                 });
                 return;
             }
-            return navigate(`/account/${signInResponse.data.sub}`);
+            //Redirect the user to the projects page after loggin in.
+            return navigate(`/projects`);
         } catch (error: any) {
             if(error.response) {
                 toast({
@@ -223,7 +234,7 @@ export default function SignUp() {
                                 </InputRightElement>
                             </InputGroup>
                         </FormControl>
-                        <HStack>
+                        <HStack mb='8px'>
                             <Tooltip 
                                 label="Passwords Don't Match"
                                 closeOnClick={false}

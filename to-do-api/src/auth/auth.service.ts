@@ -22,7 +22,7 @@ export class AuthService {
         private usersService: UsersService,
         private emailService: EmailService
     ) {}
-
+    
     /*Verify username and password. Return JWT if successful or throw an
     exception otherwise.*/
     async signIn(
@@ -83,9 +83,8 @@ export class AuthService {
     verification against the new password ensuring that each JWT can
     only be used once.*/
     async resetPassword(data: PwResetDTO) {
-    
         const { userID, token, password } = data;
-        let isSame;
+        let isSame, payload;
         if (!token) {
           throw new UnauthorizedException('Missing Auth Token');
         }
@@ -94,7 +93,7 @@ export class AuthService {
             throw new BadRequestException('User Not Found');
         }
         try {
-          const payload = await this.jwtService.verifyAsync(
+          payload = await this.jwtService.verifyAsync(
             token,
             {
               secret: user.password

@@ -1,42 +1,51 @@
 /**
  * The AppModule is the root module of the API. It provides necessary
- * metadata for Nest to organize the application structure. It imports
- * the TypeORMModule to facilitate communication with the database. It
- * also imports all other modules across the API along with a simple
- * controller and provider, AppController and AppService, to handle
- * direct requests made to http:/localhost/api.
+ * metadata for Nest to organize the application structure. It utilizes
+ * TypeORM to facilitate communication with the database. It also 
+ * provides a simple controller and provider, AppController and 
+ * AppService, to handle direct requests made to http:/localhost/api.
  */
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { TypeOrmModule } from '@nestjs/typeorm';
+import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { EmailModule } from './email/email.module';
-import GetENV from './getENV';
-
-//Load from the .env file
-const DB_HOST: string = GetENV('DB_HOST');
-const DB_PORT: number = Number(GetENV('DB_PORT'));
-const DB_USER: string = GetENV('DB_USERNAME');
-const DB_PASS: string = GetENV('DB_PASSWORD');
-const DB_NAME: string = GetENV('DB_NAME');
+import { ProjectsModule } from './projects/projects.module';
+import { ListsModule } from './lists/lists.module';
+import { FeaturesModule } from './features/features.module';
+import { UserStoriesModule } from './user-stories/user-stories.module';
+import { TasksModule } from './tasks/tasks.module';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import typeorm from './config/typeorm';
 
 @Module({
     imports: [
-        TypeOrmModule.forRoot({
-            type: 'postgres',
-            host: DB_HOST,
-            port: DB_PORT,
-            username: DB_USER,
-            password: DB_PASS,
-            database: DB_NAME,
-            autoLoadEntities: true,
-            synchronize: true
+        ConfigModule.forRoot({
+            isGlobal: true,
+            load: [typeorm]
+        }),
+        TypeOrmModule.forRootAsync({
+            inject: [ConfigService],
+            useFactory: async (
+                configService: ConfigService
+            ): Promise<TypeOrmModuleOptions> => {
+                const options = configService.get('typeorm')
+                if (!options) {
+                    throw new Error('TypeORM configuration was not found');
+                }
+                return options;
+            }
         }),
         UsersModule,
         EmailModule,
-        AuthModule
+        AuthModule,
+        ProjectsModule,
+        ListsModule,
+        FeaturesModule,
+        UserStoriesModule,
+        TasksModule
     ],
     controllers: [AppController],
     providers: [AppService],

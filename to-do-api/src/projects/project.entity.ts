@@ -1,6 +1,7 @@
 /**
  * Defines the Project Entity which corresponds to a table in the 
- * database.
+ * database and represents a project to be created, geared towards
+ * software engineering projects.
  */
 import { 
     Entity, 
@@ -9,26 +10,27 @@ import {
     PrimaryColumn,
     OneToMany,
     ManyToOne,
-    JoinColumn
+    JoinColumn,
+    Unique
 } from 'typeorm';
 import { User } from '../users/user.entity';
-import { Feature } from '../feature/feature.entity';
+import { List } from '../lists/list.entity';
 
 @Entity()
 export class Project {
     @PrimaryGeneratedColumn('uuid')
-    id: number;
+    id: string;
 
     @ManyToOne((type) => User, (user) => user.projects)
     @JoinColumn({ name: 'userID'})
     user: User;
     
-    @Column({ type:'varchar', unique: true })
+    @Column('varchar')
     title: string;
     
-    @Column({ type: 'int', unique: true })
-    position: number;
+    @Column({ type: 'varchar', nullable: true })
+    description: string;
 
-    @OneToMany((type) => Feature, (feature) => feature.project)
-    features: Feature[];
+    @OneToMany((type) => List, (list) => list.project)
+    lists: List[];
 }

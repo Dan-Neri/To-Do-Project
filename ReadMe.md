@@ -21,7 +21,7 @@ most recent project information [here](https://trello.com/b/Yb5IJhSJ/to-do-list)
         changes to 'Guest'.
 
 #### Account Update branch:
-    - Pull request open
+    - Pull request merged
     - Users are able to request a password reset email. They can then
         use the link in that email to reset the password for their 
         account.
@@ -39,7 +39,31 @@ most recent project information [here](https://trello.com/b/Yb5IJhSJ/to-do-list)
         Check to make sure that you are able to view and update each 
         piece of information on the My Account page and that it persists
         after logging out and coming back.
+        
+#### Project Creation branch:
+    - Pull request merged
+    - Projects page has been created. Users view a list of their current
+        projects on this page and create new ones.
+    - Project Information page has been created. Users are able to view
+        and add information to the project workflow on this page. 
+    - Each project starts with a To-Do list. Additional lists can be 
+        added to the project workflow. 
+    - Multiple features can be added to each list as well. Each feature 
+        tracks the total number of user stories associated with it and 
+        how many of them are completed. 
+    - Each user story can have multiple tasks associated with it. 
+        A user story is considered completed when all of it's associated
+        tasks are completed.
+    - Many changes have been made to the project filenames, structure 
+        and dependencies. Make sure to use the latest code and follow
+        the setup instructions for details.
 
+#### Project Update branch
+    - Pull request Open
+    - Currently working on implementing both front and back end update
+        methods for all components of the project workflow. Also working
+        on drag and drop functionality for lists and features.
+    
 Check **'Setup Instructions'** below for details on how to install and 
 configure the project. Then follow **'Running Instructions'** to test 
 out the app for yourself. Feel free message me at 
@@ -81,11 +105,11 @@ out the app for yourself. Feel free message me at
       - ex. PostgreSQL 16
     5. Enter your admin password
     6. Right click on Databases > Create > Database...
-    7. Name the Database To-DoDB
+    7. Choose a name for the database 
     8. Select the account that you want to use as the owner 
       - ex. postgres
     9. Click Save
-        
+
 #### Install Front-End Dependecies:
     1. Open the terminal on your pc, navigate to the location of this
         repository and enter the following commands:
@@ -115,13 +139,17 @@ out the app for yourself. Feel free message me at
     - DB_USERNAME - The username of the database owner account
         - ex. postgres 
     - DB_PASSWORD - The password of the database owner account
-    - DB_NAME - The name of the database. Set this as 'To-DoDB' unless
-        you have a different database that you are using.
+    - DB_NAME - The name of the database you have created.
     - JWT_SECRET - This is the secret key that will be used to generate
         JWTs. I recommend generating a random key. I used
-        crypto.randomBytes(length).toString('hex').
-            
-    **New** As of the Feature 2 update, Account-update, the .env file
+        crypto.randomBytes(length).toString('hex').        
+    **New** 
+    - JWT_EXP_TIME - This is the amount of time you would like for the
+        access token to be valid. Once it expires, you will have to
+        login to your account again.
+        -ex. '3600s'
+    
+    As of the Feature 2 update, Account-update, the .env file
     must also contain information for a valid SMTP server in order to
     send password reset emails. Without this information, the password
     reset functionality will not work as expected. 
@@ -154,21 +182,27 @@ out the app for yourself. Feel free message me at
     - EMAIL_PASSWORD - The password for the email address you are using.
         - ex. EmailPassword
     
+#### Update the database schema:
+    1. In your terminal, navigate to the /to-do-api folder.
+    2. Enter the following commands:
+        - npm run build
+        - npm run migration:generate
+        - npm run migration:run
+
 ## Running Instructions:
 
 #### Start the API:
-    1. Open the terminal on your pc, navigate to the location of this
-        repository and enter the following commands:
-      - cd /to-do-api
+    1. In your terminal, navigate to the /to-do-api folder.
+    2. Enter this command:
       - npm start
-    2. Leave the terminal window open, open a browser window, and
-        navigate to http://localhost:3001/api
-    3. You should see a message 'The API is running' if everything is
-        working correctly
+    3. Leave the terminal window open, open a browser window, and
+        navigate to http://localhost:3001/api.
+    4. You should see a message 'The API is running' if everything is
+        working correctly.
             
 #### Start the App:
-    1. Open a new terminal window, navigate to the location of this
-        repository and enter the following commands:
-      - cd /to-do-app
+    1. Open a new terminal window and navigate to the /to-do-app folder.
+    2. Enter this command:
       - npm start
-    2. A new browser tab should open with the App running.
+    3. Leave this second terminal window open as well. A new browser tab
+        should open with the App running.

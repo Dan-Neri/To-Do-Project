@@ -2,14 +2,10 @@
  * This file contains methods which can be reused to make calls to the
  * back-end API.
  */
-import React from 'react';
-import { useToast } from '@chakra-ui/react';
-import { useNavigate } from "react-router-dom";
-import axios, { AxiosResponse, AxiosError } from 'axios';
+import axios, { AxiosResponse } from 'axios';
 import Cookies from 'universal-cookie';
-import { StatusType, UpdateUserDTO } from '../types/types';
 
-/*Take a username and password. Send them to the API and return a jwt
+/*Take a username and password. Send them to the API and return a JWT
 if valid.*/
 export async function UserSignIn (
     username: string, 
@@ -33,13 +29,13 @@ export async function UserSignIn (
         username: username,
         password: password
     });
+    
     //Pull the JWT from the response and store it in a userData object.
     userData.jwt = response.data.access_token;
 
     //Get the user information with the JWT.
-    const getResponse = await axios.get('/auth/profile', {
-        headers: { 'Authorization': `Bearer ${userData.jwt}` }
-    });
+    const getResponse = await getUser(userData.jwt);
+    
     /*Pull the user id and username from the response and store it
     in the userData object.*/
     userData.sub = getResponse.data.sub;
@@ -55,27 +51,37 @@ export async function UserSignIn (
     return getResponse;
 }
 
-/*Take a user id and return matching account information if the user is
-authenticated.*/
-export async function FetchAccount( 
-    userID: string | undefined 
+//Get the username and ID with a valid jwt.
+export async function getUser(jwt: string | undefined) {
+    const response = await axios.get('auth/profile', {
+        headers: { 'Authorization': `Bearer ${jwt}` }
+    });
+    
+    return response;
+}
+
+/*This method is used to pull data from the back-end API. Take an API 
+route, get the access token from cookies, and use Axios to make an HTTP
+GET request to the route with the token in the header. Return the 
+response.*/
+export async function FetchData( 
+    route: string
 ): Promise<AxiosResponse> {
     const cookies = new Cookies(null, { path: '/' });
     const userData = await cookies.get('userData');
-    /*Check to make sure there is a JWT and that it matches the account
-    you are trining to access.*/
-    if (!userData || userID!==userData.sub) {
+    //Check to make sure our cookie exists and isn't expired.
+    if (!userData) {
         cookies.remove('userData', { path: '/' });
         throw new Error('Authorization expired');
     }
     
-    const { jwt, sub } = userData;
+    const { jwt } = userData;
+    //Check to make sure there is a JWT in the cookie.
     if (jwt) {
-        //Get the user information with the JWT.
-        const response = await axios.get('/users/account', {
+        //Make the GET request with the JWT in the header.
+        const response = await axios.get(route, {
             headers: { 
-                'Authorization': `Bearer ${jwt}`,
-                'sub': `${sub}`
+                'Authorization': `Bearer ${jwt}`
             }
         });
         if (!response) {
@@ -88,29 +94,31 @@ export async function FetchAccount(
     }
 }
         
-/*Take a user id and a DTO containing any user account information.
-Make an API call to allow an authenticated user to update the given
-information in the database.*/
-export async function UpdateAccount( 
-    userID: string | undefined, 
-    DTO: UpdateUserDTO 
+/*This method is used to send new or updated data to the back-end API.
+Take an API route and a an optional DTO containing information to be 
+created/updated. Get the user's access token from cookies. Use Axios to
+Make an HTTP POST request to the route with the access token in the
+header and the DTO in the body. Return the response.*/
+export async function UpdateData( 
+    route: string,
+    DTO?: any 
 ): Promise<AxiosResponse> {
     const cookies = new Cookies(null, { path: '/' });
     const userData = await cookies.get('userData');
-    /*Check to make sure there is a JWT and that it matches the account
-    you are trining to access.*/
-    if (!userData || userID!==userData.sub) {
+    //Check to make sure our cookie exists and isn't expired.
+    if (!userData) {
         cookies.remove('userData', { path: '/' });
         throw new Error('Authorization expired');
     }
     
-    const { jwt, sub } = userData;
+    const { jwt } = userData;
+    //Check to make sure there is a JWT in the cookie
     if (jwt) {
-        //Make a Post request to the API to update the user information
-        const response = await axios.post('/users/update', DTO, {
+        /*Make a Post request to the API with the JWT in the header and
+        the DTO in the body if present.*/
+        const response = await axios.post(route, DTO && DTO, {
             headers: { 
-                'Authorization': `Bearer ${userData.jwt}`,
-                'sub': `${userData.sub}`
+                'Authorization': `Bearer ${jwt}`
             }
         });
        if (!response) {

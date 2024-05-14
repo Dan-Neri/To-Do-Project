@@ -1,5 +1,6 @@
 /**
- * Defines the User entity which corresponds to a table in the database.
+ * Defines the User entity which corresponds to a table in the database
+ * and represent a single user account in the app.
  */
 import { 
     Entity, 
@@ -7,12 +8,12 @@ import {
     PrimaryGeneratedColumn,
     OneToMany
 } from 'typeorm';
-import { Project } from '../project/project.entity';
+import { Project } from '../projects/project.entity';
 
 @Entity()
 export class User {
     @PrimaryGeneratedColumn('uuid')
-    id: number;
+    id: string;
 
     @Column('varchar')
     firstName: string;
@@ -32,6 +33,9 @@ export class User {
     @OneToMany((type) => Project, (project) => project.user)
     projects: Project[];
     
-    @Column({type: 'bool', default: true })
+    @Column({ type: 'int', nullable: true })
+    projectCount: number;
+    
+    @Column({type: 'boolean', default: true })
     isActive: boolean;
 }

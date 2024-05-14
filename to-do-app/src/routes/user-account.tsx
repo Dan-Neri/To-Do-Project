@@ -1,10 +1,9 @@
 /**
- * The UserAccount route allows an authenticated user to view and update
- * their account information.
+ * The UserAccount route allows a user to view and update their account 
+ * information.
  */
- import React, { useState, useEffect, FormEvent, ChangeEvent } from 'react';
+import { useState, ChangeEvent } from 'react';
 import { 
-    Box, 
     Button, 
     Flex, 
     HStack, 
@@ -12,61 +11,31 @@ import {
     Input,
     FormControl,
     FormLabel,
-    Tooltip
+    Tooltip,
+    createStandaloneToast
 } from '@chakra-ui/react';
-import { useParams, useNavigate, Form } from "react-router-dom";
-import axios, { AxiosResponse, AxiosError } from 'axios';
+import { Form, useLoaderData, redirect } from "react-router-dom";
 import Page from '../components/page';
-import { FetchAccount, UpdateAccount } from '../api/calls'
+import { FetchData, UpdateData } from '../api/calls';
 import { StatusType, UpdateUserDTO } from '../types/types';
 
+interface LoaderData {
+    firstName: string;
+    lastName: string;
+    username: string;
+    email: string;
+}
+
 export default function UserAccount() {
-    const { userID } = useParams();
-    const [ userInfo, setUserInfo ] = useState({
-        firstName: '',
-        lastName: '',
-        username: '',
-        email: ''
-    });
+    //Get data from the loader function.
+    const loader = useLoaderData() as LoaderData;
+    //Track the contents of the password field.
     const [ password, setPassword ] = useState('');
+    //Track the contents of the confirm password field.
     const [ confirmPass, setConfirmPass ] = useState('');
+    //Track if the password and confirm password fields match.
     const [ passMatch, setPassMatch ] = useState(true);
-    const navigate = useNavigate();
     const toast = useToast();
-    
-    /*Check to make sure the user is logged in and pull their account
-    information from the API.*/
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const response = await FetchAccount(userID);
-                if (response) {
-                    const { id, ...rest } = response.data;
-                    setUserInfo(rest);
-                }
-            } catch (error: any) {
-                if(error.response) {
-                    toast({
-                        title: 'Error',
-                        description: error.response.data.message,
-                        status: 'error' as StatusType,
-                        duration: 4000,
-                        isClosable: true
-                    });
-                } else {
-                    toast({
-                        title: 'Error',
-                        description: error.message,
-                        status: 'error' as StatusType,
-                        duration: 4000,
-                        isClosable: true
-                    });
-                }
-                return navigate('/sign-in');
-            }
-        }
-        fetchData();
-    }, []);
     
     //Update the password and passMatch states.
     const handlePassword = (event: ChangeEvent<HTMLInputElement>) => {
@@ -88,56 +57,6 @@ export default function UserAccount() {
         setConfirmPass('');
         setPassMatch(true);
     }
-    
-    //Send the form data to the api to update the user's account.
-    const handleSave = async (event: FormEvent<HTMLFormElement>) => {
-        event.preventDefault();
-        const formData = new FormData(event.currentTarget as HTMLFormElement);
-        let response;
-        let DTO: UpdateUserDTO = {};
-        formData.forEach((value, key) => {
-            if ((typeof value === 'string') && (value.trim() !== '')) {
-                DTO[key] = value;
-            }
-        });
-        
-        if (Object.values(DTO).some(value => value)) {
-            try {
-                const response = await UpdateAccount(userID, DTO);
-                if (response) {
-                    const { id, ...rest } = response.data;
-                    setUserInfo(rest);
-                    toast({
-                        title: 'Success',
-                        description: 'Your information has been updated.',
-                        status: 'success' as StatusType,
-                        duration: 4000,
-                        isClosable: true
-                    });
-                    
-                }
-            } catch (error: any) {
-                if(error.response) {
-                    toast({
-                        title: 'Error',
-                        description: error.response.data.message,
-                        status: 'error' as StatusType,
-                        duration: 4000,
-                        isClosable: true
-                    });
-                } else {
-                    toast({
-                        title: 'Error',
-                        description: error.message,
-                        status: 'error' as StatusType,
-                        duration: 4000,
-                        isClosable: true
-                    });
-                    return navigate('/sign-in');
-                }
-            }
-        }
-    }
 
     return (
         <Page title='Account Information' justify='center'>
@@ -150,7 +69,7 @@ export default function UserAccount() {
                 alignItems='center'
             >
                 <Form 
-                    onSubmit={handleSave} 
+                    method='post' 
                     style={{ 
                         display: 'flex',
                         flexDirection: 'column',
@@ -165,7 +84,7 @@ export default function UserAccount() {
                             <Input 
                                 bg='white' 
                                 name='firstName'
-                                placeholder={userInfo.firstName}
+                                placeholder={loader.firstName}
                                 _placeholder={{ opacity: 1, color: 'black' }}
                             />
                         </HStack>
@@ -178,7 +97,7 @@ export default function UserAccount() {
                             <Input 
                                 bg='white' 
                                 name='lastName'
-                                placeholder={userInfo.lastName}
+                                placeholder={loader.lastName}
                                 _placeholder={{ opacity: 1, color: 'black' }}
                             />
                         </HStack>
@@ -191,7 +110,7 @@ export default function UserAccount() {
                             <Input 
                                 bg='white' 
                                 name='username'
-                                placeholder={userInfo.username}
+                                placeholder={loader.username}
                                 _placeholder={{ opacity: 1, color: 'black' }}
                             />
                         </HStack>
@@ -205,7 +124,7 @@ export default function UserAccount() {
                                 bg='white'
                                 name='email'
                                 type='email'
-                                placeholder={userInfo.email}
+                                placeholder={loader.email}
                                 _placeholder={{ opacity: 1, color: 'black' }}
                             />
                         </HStack>
@@ -267,4 +186,97 @@ export default function UserAccount() {
             </Flex>
         </Page>
     );
+}
+
+/*Fetch the user's data by making a request to the back-end API.
+Redirect to the sign in page if authorization is invalid.*/
+export async function loader(): Promise<LoaderData | Response> {
+    /*Create a toast container which can be displayed outside of our 
+    react component.*/
+    const { toast } = createStandaloneToast();
+    try {
+        //Send a request to the API to get the user's account data.
+        const response = await FetchData('/users/account');
+        //Authorization is valid.
+        if (response) {
+            //return user's data.
+            return response.data;
+        }
+    } catch (error: any) {
+        if(error.response) {
+            toast({
+                title: 'Error',
+                description: error.response.data.message,
+                status: 'error' as StatusType,
+                duration: 4000,
+                isClosable: true
+            });
+        } else {
+            toast({
+                title: 'Error',
+                description: error.message,
+                status: 'error' as StatusType,
+                duration: 4000,
+                isClosable: true
+            });
+        }
+    }
+    //Authorization is invalid.
+    return redirect('/sign-in');
+}
+
+/*Send updated user data to the back end so that it can be changed in
+the database.*/
+export async function action({ request }: { request: Request}) {
+    const formData = await request.formData();
+    const { toast } = createStandaloneToast();
+    let response;
+    //Create an empty DTO to hold any data to be updated.
+    let DTO: UpdateUserDTO = {};
+    //Check each field for updated data and store it in the DTO if found.
+    formData.forEach((value, key) => {
+        if ((typeof value === 'string') && (value.trim() !== '')) {
+            DTO[key] = value;
+        }
+    });
+    
+    //Check to make sure there is data to update.
+    if (Object.values(DTO).some(value => value)) {
+        try {
+            //Send a request to the API with the data to update in the body.
+            const response = await UpdateData(
+                '/users/update',  
+                DTO
+            );
+            if (response) {
+                toast({
+                    title: 'Success',
+                    description: 'Your information has been updated.',
+                    status: 'success' as StatusType,
+                    duration: 4000,
+                    isClosable: true
+                });
+                return redirect('/account');
+            }
+        } catch (error: any) {
+            if(error.response) {
+                toast({
+                    title: 'Error',
+                    description: error.response.data.message,
+                    status: 'error' as StatusType,
+                    duration: 4000,
+                    isClosable: true
+                });
+            } else {
+                toast({
+                    title: 'Error',
+                    description: error.message,
+                    status: 'error' as StatusType,
+                    duration: 4000,
+                    isClosable: true
+                });
+                return redirect('/sign-in');
+            }
+        }
+    }
 }

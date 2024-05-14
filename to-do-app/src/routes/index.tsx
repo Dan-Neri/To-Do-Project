@@ -2,8 +2,7 @@
  * The Index route is the default route displayed when the app is
  * started and provides a landing page for users.
  */
-import { Box, Flex, VStack, HStack } from '@chakra-ui/react';
-import { Link } from 'react-router-dom';
+import { Box } from '@chakra-ui/react';
 import Page from '../components/page';
 
 export default function Index() {

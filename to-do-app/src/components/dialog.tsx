@@ -1,6 +1,7 @@
 /**
- * The Dialog component provides a standardized component which can be
- * reused to contain and display other elements on the page.
+ * The Dialog component represents a pop-up or some container in the app
+ * which can be used to display information. It grants the basic design
+ * and functionality for modals and containers.
  */
 import React, { ReactNode } from 'react';
 import { 
@@ -19,16 +20,17 @@ interface DialogProps {
     title?: string;
     exit?: () => void;
     align?: 'top' | 'center';
+    header?: ReactNode | undefined;
     children?: ReactNode;
 }
 
 const Dialog = (props: DialogProps ) => {
     const { 
         w='500px', 
-        h='340px', 
         title='', 
         exit,
-        align='top', 
+        align='top',
+        header,
         children='' 
     } = props;
     const navigate = useNavigate();
@@ -41,21 +43,28 @@ const Dialog = (props: DialogProps ) => {
         <Flex
             justifyContent='center'
             alignItems='center'
-            w={w} 
-            h={h} 
+            w={w}
+            padding='6px'
             bg='gray' 
             color='black'
-            boxShadow='lg'
+            boxShadow='dark-lg'
         >
             <Flex
-                w='95%'
-                h='95%'
+                w='100%'
+                h='100%'
                 bg='tan'
                 flexDirection='column'
             >
                 <Flex mt='1' h='12%'>
-                    <Flex w='95%' fontSize='24' justifyContent='center'>
+                    <Flex 
+                        w='95%' 
+                        fontSize='28' 
+                        justifyContent='center' 
+                        alignItems='center'
+                        textAlign='center'
+                    >
                         {title}
+                        {header && <Flex ml='4px'>{header}</Flex>}
                     </Flex>
                     <Box justifyContent='right'>
                         <Flex padding='1'>

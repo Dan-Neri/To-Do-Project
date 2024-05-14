@@ -1,6 +1,7 @@
 /**
- * Defines the UserStory Entity which corresponds to a table in the 
- * database.
+ * Defines the UserStory entity which corresponds to a table in the 
+ * database and represents one task that the user can complete within
+ * the project.
  */
 import { 
     Entity, 
@@ -11,13 +12,13 @@ import {
     OneToMany,
     JoinColumn
 } from 'typeorm';
-import { Feature } from '../feature/feature.entity';
-import { Task } from '../task/task.entity';
+import { Feature } from '../features/feature.entity';
+import { Task } from '../tasks/task.entity';
 
 @Entity()
 export class UserStory {
     @PrimaryGeneratedColumn('uuid')
-    id: number;
+    id: string;
 
     @ManyToOne((type) => Feature, (feature) => feature.userStories)
     @JoinColumn({ name: 'FeatureID'})
@@ -26,11 +27,8 @@ export class UserStory {
     @Column('varchar')
     title: string;
     
-    @Column('varchar')
-    Description: string;
-    
-    @Column({ type: 'int', unique: true })
-    position: number;
+    @Column({ type: 'varchar', nullable: true })
+    description: string;
 
     @OneToMany((type) => Task, (task) => task.userStory)
     tasks: Task[];

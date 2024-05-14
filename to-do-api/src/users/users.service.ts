@@ -30,29 +30,41 @@ export class UsersService {
     }
 
     //Return a user with a matching id from the database.
-    async findById(id: number): Promise<User | null> {
-        return await this.usersRepository.findOne({
+    async findById(id: string): Promise<User> {
+        const user = await this.usersRepository.findOne({
             where: { id: id }
         });
+        if(!user) {
+            throw new BadRequestException('User Not Found');
+        }
+        return user;
     }
     
     //Return a user with a matching username from the database.
-    async findByName(username: string): Promise<User | null> {
-        return await this.usersRepository.findOne({ 
+    async findByName(username: string): Promise<User> {
+        const user =  await this.usersRepository.findOne({ 
             where: { username: username.toLowerCase() }
         });
+        if(!user) {
+            throw new BadRequestException('User Not Found');
+        }
+        return user;
     }
     
     //Return a user with a matching email address from the database.
-    async findByEmail(email: string): Promise<User | null> {
-        return await this.usersRepository.findOne({ 
+    async findByEmail(email: string): Promise<User> {
+        const user = await this.usersRepository.findOne({ 
             where: { email: email.toLowerCase() }
         });
+        if(!user) {
+            throw new BadRequestException('User Not Found');
+        }
+        return user;
     }
     
     /*Take a user id and return the account information for the matching
     account. Throw an error if a matching user is not found.*/
-    async getAccount(id: number): Promise<Partial<User> | null> {
+    async getAccount(id: string): Promise<Partial<User> | null> {
         let userData = null;
         const user = await this.findById(id);
         if (user) {
@@ -64,31 +76,37 @@ export class UsersService {
         return userData;
     }
     
-    /*Take new user information and create a corresponding user Object
+    /*Take new user information and create a corresponding user object
     from it. Then save that object in the database and return it. Throw 
     an error if the provided username or email address is already in 
     use.*/
-    async create(data: CreateUserDTO): Promise<Partial<User>> {
-        const { username, password, email } = data;
+    async create(DTO: CreateUserDTO): Promise<Partial<User>> {
         if(await this.usersRepository.findOne({
-            where: { username: username.toLowerCase() }
+            where: { username: DTO.username.toLowerCase() }
         })) {
-            console.log('user already exists');
             throw new ConflictException(
                 'Username already taken'
             );
         }
         if(await this.usersRepository.findOne({
-            where: { email: email.toLowerCase() }
+            where: { email: DTO.email.toLowerCase() }
         })) {
-            console.log('email already exists');
             throw new ConflictException(
                 'Email address already in use'
             );
         }
         //Hash the password, create a new user, and save it to the database.
-        data.password = await this.hashPass(password);
-        const user = this.usersRepository.create(data);
+        const hash = await this.hashPass(DTO.password);
+        const userData = {
+            firstName: DTO.firstName,
+            lastName: DTO.lastName,
+            email: DTO.email,
+            username: DTO.username,
+            password: hash,
+            projects: [],
+            projectCount: 0
+        };
+        const user = this.usersRepository.create(userData);
         const newUser = await this.usersRepository.save(user);
         const { password: newPassword, isActive, ...rest } = newUser;
         return rest;
@@ -98,15 +116,15 @@ export class UsersService {
     matching account with the provided information. Throw an error if
     the provided username or email address is already in use.*/
     async update(
-        userID: number, 
-        userInfo: Partial<User>
+        userID: string, 
+        DTO: UpdateUserDTO
     ): Promise<Partial<User>> {
         const user = await this.findById(userID);
         const update: { [key: string]: any } = {};
         if(!user) {
             throw new BadRequestException('User Not Found');
         }
-        for (let [key, value] of Object.entries(userInfo)) {
+        for (let [key, value] of Object.entries(DTO)) {
             if (key === 'firstName') {
                 user.firstName = value as string;
                 user.firstName = user.firstName[0].toUpperCase() + 
@@ -114,7 +132,7 @@ export class UsersService {
             }
             if (key === 'lastName') {
                 user.lastName = value as string;
-                user.lastName = user.lastName[0].toUpperCase() + 
+                user.lastName = user.lastName[0].toUpperCase() +  
                     user.lastName.substring(1).toLowerCase();
             }
             if (key === 'username') {
@@ -137,6 +155,9 @@ export class UsersService {
                 const hash = await this.hashPass(value as string);
                 user.password = hash;
             }
+            if (key === 'projectCount') {
+                user.projectCount = value as number;
+            }
         }
         const updatedUser = await this.usersRepository.save(user);
         const { password, isActive, ...rest } = updatedUser;
@@ -144,7 +165,7 @@ export class UsersService {
     }
     
     //Remove a user with a matching id from the database.
-    async remove(id: number): Promise<void> {
+    async remove(id: string): Promise<void> {
         await this.usersRepository.delete(id);
     }
     
@@ -158,7 +179,6 @@ export class UsersService {
             passHash = await bcrypt.hash(pass, saltRounds);
         }
         catch (error) {
-            console.error(error);
             throw new Error('Error hashing password');
         }
         return passHash;

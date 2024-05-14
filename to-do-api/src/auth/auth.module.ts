@@ -17,7 +17,7 @@ import GetENV from '../getENV';
         JwtModule.register({
             global: true,
             secret: GetENV('JWT_SECRET'),
-            signOptions: { expiresIn: '60s' }
+            signOptions: { expiresIn: GetENV('JWT_EXP_TIME') }
         }),
         UsersModule,
         EmailModule
