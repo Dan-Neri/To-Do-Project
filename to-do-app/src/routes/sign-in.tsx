@@ -1,13 +1,13 @@
 /**
- * The SignIn route allows users to provide a username and password
- * which is validated via the UserSignIn call and stored in a cookie.
- * This route also allows a user to request a password reset email by
- * clicking on the forgot password link.
+ * The SignIn route allows users to provide a username and password,
+ * which is validated via the UserSignIn call. If a matching account is
+ * found, the resulting JWT is stored in a cookie. This route also 
+ * allows a user to request a password reset email by clicking on the 
+ * forgot password link.
  */
-import React, { FormEvent, useState, useEffect } from 'react';
+import { FormEvent, useState } from 'react';
 import { 
     Box, 
-    Flex, 
     Input, 
     Button,
     HStack,
@@ -20,43 +20,41 @@ import {
     Modal,
     ModalOverlay,
     ModalContent,
-    ModalHeader,
     ModalBody,
-    ModalCloseButton,
     useDisclosure
 } from '@chakra-ui/react';
-import { 
-    Link, 
-    Form,
-    useNavigate,
-    Outlet,
-    useLocation
-} from 'react-router-dom';
-import axios, { AxiosResponse, AxiosError } from 'axios';
+import { Link, Form, useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import { UserSignIn } from '../api/calls';
 import Dialog from '../components/dialog';
 import Page from '../components/page';
 import { StatusType } from '../types/types';
 
 export default function SignIn() {
+    //Track whether to obfuscate the password field or not.
     const [showPass, setShowPass] = useState(false);
     const toast = useToast();
     const navigate = useNavigate();
     const { isOpen, onOpen, onClose } = useDisclosure();
 
-    /*Send the username and password to the UserSignIn call. Redirect
-    the user to the UserAccout route if successful or the SignIn route
-    otherwise.*/
+    /*Send a request to the API to login with the username and password. 
+    Redirect the user to their projects page if successful or the SignIn 
+    page otherwise.*/
     async function HandleSubmit(event: FormEvent<HTMLFormElement>) {
+        /*Prevent the form from sending a POST request which would 
+        refresh the page needlessly.*/
         event.preventDefault();
         const formData = new FormData(event.currentTarget as HTMLFormElement);
         let response;
         try {
+            /*Send a request to the API to sign in with the username and 
+            password in the body.*/
             response = await UserSignIn(
                 formData.get('username') as string,
                 formData.get('password') as string
             );
         }
+        //Sign in unsuccessful.
         catch (error: any) {
             toast({
                 title: 'Error',
@@ -67,6 +65,7 @@ export default function SignIn() {
             });
             return navigate('/sign-in');
         }
+        //Sign in successful.
         toast({
             title: `Welcome ${formData.get('username')}!`,
             description: 'Login Sucessful',
@@ -74,7 +73,7 @@ export default function SignIn() {
             duration: 3000,
             isClosable: true
         });
-        return navigate(`/account/${response.data.sub}`);
+        return navigate(`/projects`);
     }
     
     /*Send the email address to the API so that a one-time use JWT and a
@@ -84,14 +83,7 @@ export default function SignIn() {
         const formData = new FormData(event.currentTarget as HTMLFormElement);
         const email = formData.get('email') as string;
         let response;
-        toast({
-            title: 'Check Your Inbox',
-            description: `If a matching account is found an email will be sent 
-                to ${formData.get('email')}`,
-            status: 'info' as StatusType,
-            duration: 5000,
-            isClosable: true
-        });
+
         try {
             /*Send a Post request to the API with the email address. If
             it matches a user, a reset email will be sent.*/
@@ -99,6 +91,7 @@ export default function SignIn() {
                 email: email
             });
             if (!response) {
+                //Display an error if there is no response from the server.
                 toast({
                     title: 'Error',
                     description: 'No response from the server.',
@@ -108,9 +101,26 @@ export default function SignIn() {
                 });
                 return;
             }
-            console.log(response.data);
+            toast({
+                title: 'Check Your Inbox',
+                description: `If a matching account is found, an email 
+                    will be sent to ${formData.get('email')}`,
+                status: 'info' as StatusType,
+                duration: 5000,
+                isClosable: true
+            });
         }
         catch(error: any) {
+            //Do not display any other error messages for security purposes.
+            toast({
+                title: 'Check Your Inbox',
+                description: `If a matching account is found, an email 
+                    will be sent to ${formData.get('email')}`,
+                status: 'info' as StatusType,
+                duration: 5000,
+                isClosable: true
+            });
+            return;
         }
     }
     
@@ -153,7 +163,8 @@ export default function SignIn() {
                             </InputGroup>
                         </FormControl>
                         <HStack>
-                            <Button type='submit' colorScheme='blue'>
+                            <Button 
+                                type='submit' colorScheme='blue' boxShadow='lg'>
                                 Sign In
                             </Button>
                             <Link to='/sign-up'>

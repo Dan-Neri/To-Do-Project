@@ -1,6 +1,6 @@
 /**
- * The Page component provides a standardized background to be used on
- * most, if not all, other pages in this app.
+ * The Page component provides a basic design container for the majority
+ * of pages within the app.
  */
 import React, { ReactNode } from 'react';
 import { 
@@ -49,6 +49,7 @@ const Page = (props: PageProps ) => {
                 w={w}
                 h={h}
                 bg='tan'
+                boxShadow='dark-lg'
             >
                 <Flex 
                     w='97%' 
@@ -56,6 +57,7 @@ const Page = (props: PageProps ) => {
                     bg={bg} 
                     flexDirection='column'
                     alignItems='center'
+                    
                 >
                     <Box fontSize='32'>
                         {title}

@@ -1,15 +1,10 @@
 /**
  * The ResetPassword route is only shown to users who have a requested a
  * password reset email and requires a unique one-time use JWT which 
- * expires after 15 minutes and is created by the api after requesting a
+ * expires after 15 minutes and is created by the API after requesting a
  * password reset email from the sign-in route.
  */
- import React, { 
-    FormEvent, 
-    useState, 
-    useEffect, 
-    ChangeEvent 
-} from 'react';
+import { FormEvent, useState, ChangeEvent } from 'react';
 import { 
     Flex, 
     Input, 
@@ -22,19 +17,21 @@ import {
     useToast,
     Tooltip
 } from '@chakra-ui/react';
-import { 
-    Form, 
-    useParams,
-    useNavigate
-} from 'react-router-dom';
-import axios, { AxiosResponse, AxiosError } from 'axios';
+import { Form, useParams, useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import Dialog from '../components/dialog';
+import { ResetPasswordDTO } from '../types/types';
 
 export default function ResetPassword() {
-    const [showPass, setShowPass] = useState(false);
-    const [showConfirmPass, setShowConfirmPass] = useState(false)
+    //Track the contents of the password field.
     const [password, setPassword] = useState('');
+    //Track the contents of the confirm password field.
     const [confirmPass, setConfirmPass] = useState('');
+    //Track whether to obfuscate the password field or not. 
+    const [showPass, setShowPass] = useState(false);
+    //Track whether to obfuscate the confirm password field or not.
+    const [showConfirmPass, setShowConfirmPass] = useState(false)
+    //Track if the password and confirm password fields match.
     const [passMatch, setPassMatch] = useState(false);
     const navigate = useNavigate();
     const toast = useToast();
@@ -60,18 +57,18 @@ export default function ResetPassword() {
     the user password.*/
     async function handleSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
-        const formData = new FormData;
+        //Create an object containing the data we need to send to the API.
+        const DTO: ResetPasswordDTO = {
+            token: token as string,
+            userID: userID as string,
+            password: password
+        }
         //Send a Post request to the API to update the password.
         try {
-            const response = await axios.post('/auth/pw-reset', {
-                userID: userID,
-                token: token,
-                password: password,
-            })
+            const response = await axios.post('/auth/pw-reset', DTO)
         }
         catch (error: any) {
             const statusCode = error.response?.status;
-            console.log(error);
             const msg = statusCode === 400? (
                 'Password must not match previous.'
             ) : (
@@ -176,6 +173,7 @@ export default function ResetPassword() {
                                 <Button 
                                     type={passMatch? 'submit' : 'button'} 
                                     colorScheme='blue'
+                                    mb='8px'
                                 >
                                     Submit
                                 </Button>

@@ -1,5 +1,5 @@
 /**
- * The App file contains the main React App description. It uses 
+ * The App file contains the main React App description. This app uses 
  * ChakraUI to quickly inject predefined, customizable components and
  * Axios to make http requests to the back-end API.
  */
@@ -20,7 +20,17 @@ import Index from './routes/index';
 import SignUp, { action as signUpAction } from './routes/sign-up';
 import SignIn from './routes/sign-in';
 import ResetPassword from './routes/reset-password';
-import UserAccount from './routes/user-account';
+import UserAccount, { 
+    loader as AccountLoader, 
+    action as AccountAction 
+} from './routes/user-account';
+import Projects, {
+    loader as ProjectsLoader, 
+    action as ProjectsAction 
+} from './routes/projects';
+import ProjectInfo, { 
+    loader as ProjectInfoLoader 
+} from './routes/project-info';
 
 //Set the baseURL which will prepend all other axios calls.
 axios.defaults.baseURL = 'http://localhost:3001/api';
@@ -47,12 +57,25 @@ const router = createBrowserRouter(
                     element={<SignIn />}
                 />
                 <Route
-                    path='/account/:userID'
+                    path='/account'
                     element={<UserAccount />}
+                    loader={AccountLoader}
+                    action={AccountAction}
                 />
                 <Route
                     path='/account/:userID/pw-reset/:token'
                     element={<ResetPassword />}
+                />
+                <Route
+                    path='/projects'
+                    element={<Projects />}
+                    loader={ProjectsLoader}
+                    action={ProjectsAction}
+                />
+                <Route
+                    path='/projects/info'
+                    element={<ProjectInfo />}
+                    loader={ProjectInfoLoader}
                 />
             </Route>
         </Route>

@@ -2,29 +2,29 @@
  * The TopMenu route is the root level route for the project planning 
  * app. It displays an authenticated user's username in a bar at the top
  * of the screen and provides other navigation buttons. All other routes
- * in this app are children of the TopMenu route and are displayed in
- * outlet space below the bar at the top of the screen.
+ * in this app are children of the TopMenu route and are displayed in 
+ * the outlet space below the bar at the top of the screen.
  */
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Box, Button, Flex, HStack } from '@chakra-ui/react';
 import { Outlet, Link, useNavigate } from "react-router-dom";
 import Cookies from 'universal-cookie';
 import img from '../images/plant1920.jpg';
 
 export default function TopMenu() {
+    //Track the username of the user.
     const [username, setUsername] = useState('Guest');
-    const [userID, setUserID] = useState('');
+    //Track if the user is logged in.
     const [loggedIn, setLoggedIn] = useState(false);
     const navigate = useNavigate();
     const cookies = new Cookies(null, { path: '/' });
     
-    //
+    //Keep the username and logged in state updated.
     useEffect(() => {
-        //Check cookie for user data.
+        //Check for our cookie.
         const userData = cookies.get('userData');
         if (userData) {
             setUsername(userData.username);
-            setUserID(userData.sub);
             setLoggedIn(true);
         }
     }, [cookies.get('userData')]);
@@ -46,11 +46,32 @@ export default function TopMenu() {
                 fontSize='16'
             >
                 <Flex justify='flex-start' alignItems='center' ml='10px'>
-                    <Link to='/'>
-                        <Button h='28px' fontSize='16' colorScheme='blue'>
-                            Home
-                        </Button>
-                    </Link>
+                    <HStack>
+                        <Link to='/'>
+                            <Button 
+                                h='28px' 
+                                fontSize='16' 
+                                colorScheme='blue'
+                                boxShadow='lg'
+                                textShadow='1px 1px teal.500'
+                            >
+                                Home
+                            </Button>
+                        </Link>
+                        {loggedIn &&
+                            <Link to='/projects'>
+                                <Button 
+                                    h='28px' 
+                                    fontSize='16' 
+                                    colorScheme='blue'
+                                    boxShadow='lg'
+                                    textShadow='1px 1px teal.500'
+                                >
+                                    Projects
+                                </Button>
+                            </Link>
+                        }
+                    </HStack>
                 </Flex>
                 <HStack
                     justify='flex-end'
@@ -62,13 +83,14 @@ export default function TopMenu() {
                         {loggedIn? username : 'Guest'}
                     </Box>
                     {loggedIn? (
-                        <Link to={`/account/${userID}`}>
+                        <Link to={`/account`}>
                             <Button
                                 w='84px'
                                 h='24px'
                                 colorScheme='blue'
-                                boxShadow='base'
+                                boxShadow='lg'
                                 fontSize='14'
+                                textShadow='1px 1px teal.500'
                             >
                                 My Account
                             </Button>
@@ -79,8 +101,9 @@ export default function TopMenu() {
                                 w='64px'
                                 h='24px'
                                 colorScheme='blue'
-                                boxShadow='base'
+                                boxShadow='lg'
                                 fontSize='14'
+                                textShadow='1px 1px teal.500'
                             >
                                 Sign In
                             </Button>

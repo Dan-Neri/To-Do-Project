@@ -2,7 +2,7 @@
  * This file contains an email template to be used when sending a
  * password reset email.
  */
-const resetEmailTemplate = (id: number, token: string) => {
+const resetEmailTemplate = (id: string, token: string) => {
     return `
         <html>
             <h1>We received a request to reset your password</h1>

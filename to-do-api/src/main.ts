@@ -6,13 +6,18 @@
  */
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
+import { ValidationPipe } from '@nestjs/common';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
-  //Set the root folder. All other api routes are prepended with /api.
-  app.setGlobalPrefix('api');
-  //Allow requests from the UI.
-  app.enableCors({'origin': 'http://localhost:3000'});
-  await app.listen(3001);
+    const app = await NestFactory.create(AppModule);
+    //Set the root folder. All other api routes are prepended with /api.
+    app.setGlobalPrefix('api');
+    //Allow requests from the UI.
+    app.enableCors({'origin': 'http://localhost:3000'});
+    //Allow us to use validation and transformation decorators
+    app.useGlobalPipes(new ValidationPipe({
+        transform: true
+    }));
+    await app.listen(3001);
 }
 bootstrap();

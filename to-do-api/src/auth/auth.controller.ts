@@ -27,8 +27,8 @@ export class AuthController {
     match a valid account.*/
     @HttpCode(HttpStatus.OK)
     @Post('login')
-    signIn(@Body() body: SignInDTO) {
-        return this.authService.signIn(body.username, body.password);
+    signIn(@Body() DTO: SignInDTO) {
+        return this.authService.signIn(DTO.username, DTO.password);
     }
 
     /*Decode an authenticated user's JWT from the request header and 
@@ -43,15 +43,15 @@ export class AuthController {
     address in the request body. Throw an error if no matching account 
     is found.*/
     @Post('reset-email')
-    sendResetEmail(@Body() body: { email: string }) {
-        return this.authService.sendResetEmail(body.email);
+    sendResetEmail(@Body() DTO: { email: string }) {
+        return this.authService.sendResetEmail(DTO.email);
     }
     
     /*Take a user id, new password, and JWT in the request body. Update
     the password of the matching user to the provided password. Throw
     an error if a matching user is not found or the JWT is invalid.*/
     @Post('pw-reset')
-    resetPassword(@Body() body: PwResetDTO) {
-        return this.authService.resetPassword(body);
+    resetPassword(@Body() DTO: PwResetDTO) {
+        return this.authService.resetPassword(DTO);
     }
 }

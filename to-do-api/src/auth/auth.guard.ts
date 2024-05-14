@@ -16,7 +16,7 @@ import GetENV from '../getENV';
 
 export interface RequestWithUser extends Request {
     user: {
-        sub: number,
+        sub: string,
         username: string
     };
 }
