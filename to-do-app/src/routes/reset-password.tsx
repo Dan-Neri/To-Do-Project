@@ -62,10 +62,10 @@ export default function ResetPassword() {
             token: token as string,
             userID: userID as string,
             password: password
-        }
+        };
         //Send a Post request to the API to update the password.
         try {
-            const response = await axios.post('/auth/pw-reset', DTO)
+            await axios.post('/auth/pw-reset', DTO);
         }
         catch (error: any) {
             const statusCode = error.response?.status;

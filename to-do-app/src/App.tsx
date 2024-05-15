@@ -1,18 +1,15 @@
 /**
  * The App file contains the main React App description. This app uses 
- * ChakraUI to quickly inject predefined, customizable components and
+ * ReactRouter for client side routing and improved user experience. It
+ * also utilizes ChakraUI to quickly inject predefined components and
  * Axios to make http requests to the back-end API.
  */
-import React from 'react';
-import { Box, Button, HStack, VStack} from '@chakra-ui/react';
-import { useState } from 'react';
 import axios from 'axios';
 import { 
     createBrowserRouter,
     createRoutesFromElements,
     RouterProvider,
-    Route,
-    Outlet
+    Route
 } from "react-router-dom";
 import ErrorPage from './error-page';
 import TopMenu from './routes/top-menu';
@@ -42,6 +39,8 @@ const router = createBrowserRouter(
             element={<TopMenu />}
             errorElement={<ErrorPage />}
         >
+            {/*Create a wrapper error route to allow the TopMenu route to
+            persist after any unexpected error in the children routes.*/}
             <Route errorElement={<ErrorPage />}>
                 <Route 
                     index 

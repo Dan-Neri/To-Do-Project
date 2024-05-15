@@ -30,8 +30,6 @@ interface ListProps {
     projectID: string;
     lists: List[];
     setLists: React.Dispatch<React.SetStateAction<List[]>>;
-    w?: string;
-    h?: string;
     title?: string;
 }
 
@@ -40,9 +38,7 @@ const ListComponent = (props: ListProps) => {
         id,
         projectID,
         lists,
-        setLists,
-        w='20%', 
-        h='10%', 
+        setLists, 
         title='add a title'
     } = props;
     const { isOpen, onOpen, onClose } = useDisclosure();
@@ -59,7 +55,7 @@ const ListComponent = (props: ListProps) => {
     useEffect(() => {
         const list = lists.find(list => list.id === id);
         setFeatures(list? list.features : []);
-    }, [lists])
+    }, [lists, id])
     
     //Add a feature to this list.
     const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {

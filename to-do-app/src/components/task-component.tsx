@@ -57,11 +57,14 @@ const TaskComponent = (props: TaskProps) => {
             feature => feature.id === featureID
         ) : undefined;
         const userStory = feature? feature.userStories.find(
-            userStory => userStory.id === id
+            userStory => userStory.id === userStoryID
         ) : undefined;
+        const task = userStory? userStory.tasks.find(
+            task => task.id === id
+        ) : undefined
         setCompleted(task? task.completed : false);
         setContent(task? task.content : 'New Task');
-    }, [lists])
+    }, [lists, id, listID, featureID, userStoryID])
     
     //Mark this task completed or uncompleted.
     const handleCheckTask = async (event: ChangeEvent<HTMLInputElement>) => {

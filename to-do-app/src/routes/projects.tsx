@@ -229,7 +229,7 @@ export async function action({ request }: { request: Request}) {
     try {
         /*Send a request to the API to create a new project with the 
         data in the body.*/
-        const response = await UpdateData('/projects/create', DTO);
+        await UpdateData('/projects/create', DTO);
     } catch (error: any) {
         if(error.response) {
             toast({

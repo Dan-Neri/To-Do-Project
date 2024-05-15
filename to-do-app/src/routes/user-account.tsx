@@ -6,8 +6,7 @@ import { useState, ChangeEvent } from 'react';
 import { 
     Button, 
     Flex, 
-    HStack, 
-    useToast,
+    HStack,
     Input,
     FormControl,
     FormLabel,
@@ -35,7 +34,6 @@ export default function UserAccount() {
     const [ confirmPass, setConfirmPass ] = useState('');
     //Track if the password and confirm password fields match.
     const [ passMatch, setPassMatch ] = useState(true);
-    const toast = useToast();
     
     //Update the password and passMatch states.
     const handlePassword = (event: ChangeEvent<HTMLInputElement>) => {
@@ -230,7 +228,6 @@ the database.*/
 export async function action({ request }: { request: Request}) {
     const formData = await request.formData();
     const { toast } = createStandaloneToast();
-    let response;
     //Create an empty DTO to hold any data to be updated.
     let DTO: UpdateUserDTO = {};
     //Check each field for updated data and store it in the DTO if found.

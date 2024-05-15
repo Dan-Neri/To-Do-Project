@@ -23,12 +23,12 @@ import {
     ModalBody,
     useDisclosure
 } from '@chakra-ui/react';
-import { Link, Form, useNavigate } from 'react-router-dom';
+import { Link, Form, useNavigate, useOutletContext } from 'react-router-dom';
 import axios from 'axios';
 import { UserSignIn } from '../api/calls';
 import Dialog from '../components/dialog';
 import Page from '../components/page';
-import { StatusType } from '../types/types';
+import { StatusType, outletContextType } from '../types/types';
 
 export default function SignIn() {
     //Track whether to obfuscate the password field or not.
@@ -36,6 +36,10 @@ export default function SignIn() {
     const toast = useToast();
     const navigate = useNavigate();
     const { isOpen, onOpen, onClose } = useDisclosure();
+    const { 
+        setLoggedIn, 
+        setUsername 
+    }: outletContextType  = useOutletContext();
 
     /*Send a request to the API to login with the username and password. 
     Redirect the user to their projects page if successful or the SignIn 
@@ -45,13 +49,14 @@ export default function SignIn() {
         refresh the page needlessly.*/
         event.preventDefault();
         const formData = new FormData(event.currentTarget as HTMLFormElement);
-        let response;
         try {
             /*Send a request to the API to sign in with the username and 
             password in the body.*/
-            response = await UserSignIn(
+            await UserSignIn(
                 formData.get('username') as string,
-                formData.get('password') as string
+                formData.get('password') as string,
+                setLoggedIn,
+                setUsername
             );
         }
         //Sign in unsuccessful.
@@ -82,7 +87,6 @@ export default function SignIn() {
         event.preventDefault();
         const formData = new FormData(event.currentTarget as HTMLFormElement);
         const email = formData.get('email') as string;
-        let response;
 
         try {
             /*Send a Post request to the API with the email address. If

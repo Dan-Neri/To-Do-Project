@@ -9,7 +9,9 @@ import Cookies from 'universal-cookie';
 if valid.*/
 export async function UserSignIn (
     username: string, 
-    password: string
+    password: string,
+    setLoggedIn: (loggedIn: boolean) => void,
+    setUsername: (username: string) => void
 ): Promise<AxiosResponse> {
     const cookies = new Cookies(
         null, 
@@ -40,6 +42,9 @@ export async function UserSignIn (
     in the userData object.*/
     userData.sub = getResponse.data.sub;
     userData.username = getResponse.data.username;
+    //Update the logged in state and username.
+    setUsername(getResponse.data.username);
+    setLoggedIn(true);
 
     //Serialize the userData object and store it in a cookie
     const dataString = JSON.stringify(userData);
@@ -48,6 +53,7 @@ export async function UserSignIn (
             sameSite: 'lax',
             maxAge: 3600
     });
+    
     return getResponse;
 }
 

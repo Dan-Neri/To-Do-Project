@@ -13,6 +13,13 @@ export type StatusType = (
     undefined
 );
 
+/*An interface describing the outlet context object used to update the
+logged in status and username.*/
+export interface outletContextType {
+    setLoggedIn: (loggedIn: boolean) => void;
+    setUsername: (username: string) => void;
+}
+
 //An interface describing the transfer object used to reset a user's password.
 export interface ResetPasswordDTO {
     token: string;

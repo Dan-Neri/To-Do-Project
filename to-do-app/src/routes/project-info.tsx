@@ -6,44 +6,30 @@
  * sync with the database. The lists state variable is passed to each 
  * subcomponent with a callback to facilitate these updates.
  */
-import { useState, useEffect, MouseEvent, useRef } from 'react';
+import { useState, useEffect, MouseEvent } from 'react';
 import { 
-    Button, 
     Flex, 
-    HStack,
-    VStack,    
+    HStack,  
     useToast, 
-    Modal,
-    ModalOverlay,
-    ModalContent,
-    ModalBody,
-    useDisclosure,
     createStandaloneToast,
-    FormControl,
-    FormLabel,
-    Input,
     IconButton
 } from '@chakra-ui/react';
 import { 
     useNavigate, 
     useLoaderData, 
-    redirect,
-    Form
+    redirect
 } from 'react-router-dom';
 import Page from '../components/page';
-import Dialog from '../components/dialog';
 import ListComponent from '../components/list-component';
-import Cookies from 'universal-cookie';
 import { FetchData, UpdateData } from '../api/calls';
 import { StatusType, Project, List, CreateListDTO } from '../types/types';
 import { AddIcon } from '@chakra-ui/icons';
-import { draggable } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
+//import { draggable } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
 
 export default function ProjectInfo() {
     const toast = useToast();
     const navigate = useNavigate();
     //const featureRef = useRef(null);
-    const { isOpen, onOpen, onClose } = useDisclosure();
     const project = useLoaderData() as Project;
     /*Track the state all lists which amounts to the entirety of the 
     project workflow data.*/
@@ -64,7 +50,7 @@ export default function ProjectInfo() {
             );
             setLists(sortedLists);
         }
-    }, []);
+    }, [project]);
     
     //Add a list to the project.
     const handleAddList = async (event: MouseEvent<HTMLButtonElement>) => {
@@ -149,40 +135,6 @@ export default function ProjectInfo() {
                     onClick={handleAddList}
                 />
             </HStack>
-            <Modal isOpen={isOpen} onClose={onClose}>
-                <ModalOverlay />
-                <ModalContent>
-                    <Dialog
-                        title='Create a Project' 
-                        h='200px' 
-                        exit={onClose}
-                    >
-                        <ModalBody>
-                            <Form 
-                                method='post' 
-                                onSubmit={(event) => onClose()}
-                            >
-                                <VStack>
-                                    <FormControl isRequired>
-                                        <FormLabel>
-                                            Title: 
-                                        </FormLabel>
-                                        <Input 
-                                            bg='white'  
-                                            name='title' 
-                                        />
-                                    </FormControl>
-                                    <Button 
-                                        type='submit' 
-                                    >
-                                        Create
-                                    </Button>
-                                </VStack>
-                            </Form>
-                        </ModalBody>
-                    </Dialog>
-                </ModalContent>
-            </Modal>
         </Page>
     );
 }

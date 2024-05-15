@@ -5,7 +5,7 @@
  * in this app are children of the TopMenu route and are displayed in 
  * the outlet space below the bar at the top of the screen.
  */
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Box, Button, Flex, HStack } from '@chakra-ui/react';
 import { Outlet, Link, useNavigate } from "react-router-dom";
 import Cookies from 'universal-cookie';
@@ -17,17 +17,25 @@ export default function TopMenu() {
     //Track if the user is logged in.
     const [loggedIn, setLoggedIn] = useState(false);
     const navigate = useNavigate();
-    const cookies = new Cookies(null, { path: '/' });
+    //Ensure that we only update cookies when necessary
+    const cookies = useMemo(() => new Cookies(null, { path: '/' }), []);
+    //Track the data in our cookie.
+    const [userData, setUserData] = useState(cookies.get('userData'));
+    /*Create a context object which we can pass to the child routes
+    allowing them to update the logged in status and username.*/
+    const outletContext = { setLoggedIn, setUsername };
     
     //Keep the username and logged in state updated.
     useEffect(() => {
-        //Check for our cookie.
-        const userData = cookies.get('userData');
         if (userData) {
             setUsername(userData.username);
             setLoggedIn(true);
         }
-    }, [cookies.get('userData')]);
+        else {
+            setUsername('Guest');
+            setLoggedIn(false);
+        }
+    }, [userData]);
     
     //Remove the userData cookie and sign the user out.
     function SignOut() {
@@ -136,7 +144,7 @@ export default function TopMenu() {
                 </HStack>
             </Flex>
             <Box bgImage={img} bgSize='100% 100%'>
-                <Outlet />
+                <Outlet context={outletContext} />
             </Box>
         </Box>
     );

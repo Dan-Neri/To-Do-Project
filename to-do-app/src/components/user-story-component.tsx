@@ -9,7 +9,6 @@ import {
     Box,
     Button,
     Flex,
-    useDisclosure,
     useToast,
     Divider,
     Accordion,
@@ -45,7 +44,6 @@ const UserStoryComponent = (props: UserStoryProps) => {
         title,
         description
     } = props;
-    const { isOpen, onOpen, onClose } = useDisclosure();
     const toast = useToast();
     const navigate = useNavigate();
     //Find this specific user story.
@@ -78,7 +76,7 @@ const UserStoryComponent = (props: UserStoryProps) => {
             userStory => userStory.id === id
         ) : undefined;
         setTasks(userStory? userStory.tasks : []);
-    }, [lists])
+    }, [lists, id, listID, featureID])
     
     //Keep the taskCount and completedCount updated.
     useEffect(() => {

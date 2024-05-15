@@ -32,8 +32,6 @@ interface FeatureProps {
     listID: string;
     lists: List[];
     setLists: React.Dispatch<React.SetStateAction<List[]>>;
-    w?: string;
-    h?: string;
     title?: string;
     description?: string;
 }
@@ -45,8 +43,6 @@ const FeatureComponent = (props: FeatureProps) => {
         listID,
         lists,
         setLists,
-        w='20%', 
-        h='10%',
         title='add a title',
         description='add a description'
     } = props;
@@ -70,6 +66,7 @@ const FeatureComponent = (props: FeatureProps) => {
     );
     //Track the total number of user stories in this feature.
     const [storyCount, setStoryCount] = useState(userStories.length);
+    
     //Track the number of completed user stories in this feature.
     const [completedCount, setCompletedCount] = useState(() => {
         return userStories.reduce((count, userStory) => {
@@ -87,7 +84,7 @@ const FeatureComponent = (props: FeatureProps) => {
             feature => feature.id === id
         ) : undefined;
         setUserStories(feature? feature.userStories : []);
-    }, [lists])
+    }, [lists, id, listID])
     
     //Keep the storyCount and completedCount updated.
     useEffect(() => {

@@ -15,12 +15,12 @@ import {
     Tooltip,
     useToast
 } from '@chakra-ui/react';
-import { Link, Form, useNavigate } from 'react-router-dom';
+import { Link, Form, useNavigate, useOutletContext } from 'react-router-dom';
 import axios from 'axios';
 import { UserSignIn } from '../api/calls';
 import Dialog from '../components/dialog';
 import Page from '../components/page';
-import { StatusType, CreateUserDTO } from '../types/types';
+import { StatusType, CreateUserDTO, outletContextType } from '../types/types';
 
 export default function SignUp() {
     //Track the contents of the password field.
@@ -35,6 +35,7 @@ export default function SignUp() {
     const [showConfirmPass, setShowConfirmPass] = useState(false);
     const navigate = useNavigate();
     const toast = useToast();
+    const { setLoggedIn, setUsername }: outletContextType = useOutletContext();
     
     //Update the password and passMatch states.
     const handlePassword = (event: ChangeEvent<HTMLInputElement>) => {
@@ -83,7 +84,7 @@ export default function SignUp() {
         try {
             /*Send a request to create a new user to the API with the user 
             data in the body.*/
-            const response = await axios.post('/users/create', DTO);
+            await axios.post('/users/create', DTO);
         }
         catch (error: any) {
             if(error.response) {
@@ -108,7 +109,12 @@ export default function SignUp() {
         try {
             /*Send a request to the API to sign in the user with their
             username and password.*/
-            const signInResponse = await UserSignIn(username, password);
+            const signInResponse = await UserSignIn(
+                username, 
+                password,
+                setLoggedIn,
+                setUsername
+            );
             if (!signInResponse) {
                 toast({
                     title: 'Error',

@@ -2,16 +2,8 @@
  * The Page component provides a basic design container for the majority
  * of pages within the app.
  */
-import React, { ReactNode } from 'react';
-import { 
-    Box,
-    Button,
-    Flex,
-    CloseButton,
-    VStack,
-    HStack
-} from '@chakra-ui/react';
-import { Link, useNavigate } from 'react-router-dom';
+import { ReactNode } from 'react';
+import { Box, Flex } from '@chakra-ui/react';
 
 interface PageProps {
     w?: string;
@@ -33,7 +25,6 @@ const Page = (props: PageProps ) => {
         justify='center',
         children='' 
     } = props;
-    const navigate = useNavigate();
     
     return (
         <Flex 
