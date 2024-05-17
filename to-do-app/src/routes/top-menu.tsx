@@ -19,8 +19,7 @@ export default function TopMenu() {
     const navigate = useNavigate();
     //Ensure that we only update cookies when necessary
     const cookies = useMemo(() => new Cookies(null, { path: '/' }), []);
-    //Track the data in our cookie.
-    const [userData, setUserData] = useState(cookies.get('userData'));
+    const userData = cookies.get('userData');
     /*Create a context object which we can pass to the child routes
     allowing them to update the logged in status and username.*/
     const outletContext = { setLoggedIn, setUsername };

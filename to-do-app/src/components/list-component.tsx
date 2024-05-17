@@ -17,13 +17,17 @@ import {
     FormLabel,
     Input,
     useToast,
-    Divider
+    Divider,
+    Editable,
+    EditableInput,
+    EditablePreview
 } from '@chakra-ui/react';
 import { useNavigate, Form } from 'react-router-dom';
 import { StatusType, List, CreateFeatureDTO } from '../types/types';
 import Dialog from '../components/dialog';
 import { UpdateData } from '../api/calls';
 import FeatureComponent from '../components/feature-component';
+import EditableIcon from '../components/editable-icon';
 
 interface ListProps {
     id: string;
@@ -39,7 +43,7 @@ const ListComponent = (props: ListProps) => {
         projectID,
         lists,
         setLists, 
-        title='add a title'
+        title='Add a Title'
     } = props;
     const { isOpen, onOpen, onClose } = useDisclosure();
     const toast = useToast();
@@ -58,7 +62,7 @@ const ListComponent = (props: ListProps) => {
     }, [lists, id])
     
     //Add a feature to this list.
-    const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+    const handleAddFeature = async (event: FormEvent<HTMLFormElement>) => {
         /*Prevent the form from sending a traditional POST request when
         submitted which would refresh the page needlessly*/
         event.preventDefault();
@@ -128,6 +132,19 @@ const ListComponent = (props: ListProps) => {
         }
     }
     
+    const handleEditTitle = (nextValue: string) => {
+        const currentValue = title ?? 'Add a Title';
+        if (nextValue !== currentValue) {
+            toast({
+                title: 'Update List Title',
+                description: `Change the List title from ${currentValue} to ${nextValue}`,
+                status: 'info' as StatusType,
+                duration: 4000,
+                isClosable: true
+            });
+        }
+    }
+    
     return (
         <Flex
             w='20%' 
@@ -153,7 +170,14 @@ const ListComponent = (props: ListProps) => {
                     bg='cyan.300'
                     borderTopRadius='xl'
                 >
-                    {title}
+                    <Editable 
+                        defaultValue={title} 
+                        onSubmit={handleEditTitle}
+                    >
+                        <EditablePreview mr='4px' cursor='pointer' />
+                        <EditableInput />
+                        <EditableIcon ariaLabel='Edit List Title'/>
+                    </Editable>
                 </Flex>
                 <Spacer />
                 <VStack 
@@ -199,7 +223,7 @@ const ListComponent = (props: ListProps) => {
                     >
                         <ModalBody>
                             <Form onSubmit={(event) => { 
-                                handleSubmit(event); 
+                                handleAddFeature(event); 
                                 onClose();
                             }}>
                                 <VStack>

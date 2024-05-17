@@ -4,8 +4,9 @@
  * any list and tracks the number of completed user stories as well as 
  * the total user stories contained within it.
  */
-import React, { FormEvent, useState, useEffect } from 'react';
+import React, { FormEvent, useState, useEffect, useRef } from 'react';
 import { 
+    Box,
     Button,
     Flex,
     Modal,
@@ -17,7 +18,16 @@ import {
     FormLabel,
     Input,
     useToast,
-    IconButton
+    IconButton,
+    Menu,
+    MenuButton,
+    MenuList,
+    MenuItem,
+    Editable,
+    EditableInput,
+    EditableTextarea,
+    EditablePreview,
+    Textarea
 } from '@chakra-ui/react';
 import { useNavigate, Form } from 'react-router-dom';
 import Dialog from '../components/dialog';
@@ -25,6 +35,8 @@ import { StatusType, List, CreateUserStoryDTO } from '../types/types';
 import { EditIcon } from '@chakra-ui/icons';
 import { UpdateData } from '../api/calls';
 import UserStoryComponent from '../components/user-story-component';
+import { VscKebabVertical } from 'react-icons/vsc';
+import EditableIcon from '../components/editable-icon';
 
 interface FeatureProps {
     id: string;
@@ -43,8 +55,8 @@ const FeatureComponent = (props: FeatureProps) => {
         listID,
         lists,
         setLists,
-        title='add a title',
-        description='add a description'
+        title='Add a title',
+        description='Add a description'
     } = props;
     const { isOpen, onOpen, onClose } = useDisclosure();
     const { 
@@ -66,7 +78,6 @@ const FeatureComponent = (props: FeatureProps) => {
     );
     //Track the total number of user stories in this feature.
     const [storyCount, setStoryCount] = useState(userStories.length);
-    
     //Track the number of completed user stories in this feature.
     const [completedCount, setCompletedCount] = useState(() => {
         return userStories.reduce((count, userStory) => {
@@ -76,6 +87,7 @@ const FeatureComponent = (props: FeatureProps) => {
             return completed ? count + 1 : count;
         }, 0);
     })
+    const initialRef = useRef(null);
 
     //Keep the list of user stories within this feature updated.
     useEffect(() => {
@@ -181,55 +193,174 @@ const FeatureComponent = (props: FeatureProps) => {
         }
     }
     
+    //Update the Feature title.
+    const handleEditTitle = (nextValue: string) => {
+        const currentValue = title ?? 'Add a title';
+        if (nextValue !== currentValue) {
+            toast({
+                title: 'Update Feature Title',
+                description: `Change the Feature title from ${currentValue} to ${nextValue}`,
+                status: 'info' as StatusType,
+                duration: 4000,
+                isClosable: true
+            });
+        }
+    }
+    
+    //Update the Feature description.
+    const handleEditDescription = (nextValue: string) => {
+        const currentValue = description ?? 'Add a description';
+        if (nextValue !== currentValue) {
+            toast({
+                title: 'Update Feature description',
+                description: `Change the Feature description from ${currentValue} to ${nextValue}`,
+                status: 'info' as StatusType,
+                duration: 4000,
+                isClosable: true
+            });
+        }
+    }
+    
+    //Delete the feature along with all associated user stories and tasks.
+    const handleDelete = () => {
+        toast({
+            title: 'Delete Feature',
+            description: `Display delete Feature confirmation Modal`,
+            status: 'info' as StatusType,
+            duration: 4000,
+            isClosable: true
+        });
+    }
+    
     return (
         <Flex 
             w='100%'
-            bg='teal.100'
             textIndent='4px'
             boxShadow='md'
-            onClick={onOpen}
-            _hover={{ bg: '#e8d9c4' }}
             cursor='pointer'
+            bg='teal.100'
+            _hover={{ bg: '#e8d9c4' }}
+            onClick={onOpen}
         >
             <Flex w='100%' mr='4px' justify='space-between'>
                 <Flex>
                     {title}
                 </Flex>
                 <Flex>
-                    {completedCount}/{storyCount}
+                    <Flex mr='4px'>
+                        {completedCount}/{storyCount}
+                    </Flex>
+                    <Menu>
+                        <MenuButton 
+                            as={IconButton} 
+                            aria-label='Feature Settings'
+                            icon={
+                                <Box w='10px' h='16px' mr='4px'>
+                                    <VscKebabVertical size='100%'/>
+                                </Box>
+                            }
+                            bg=''
+                            _hover={{ bg: '' }}
+                            _active={{ bg: '' }}
+                            size='xs'
+                            mr='2px'
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            Actions
+                        </MenuButton>
+                        <MenuList>
+                            {/*<MenuItem 
+                                _hover= {{ bg: '#e8d9c4' }} 
+                                _focus= {{ bg: '#e8d9c4' }} 
+                                onClick={(e) => {
+                                    e.stopPropagation(); 
+                                    handleEditTitle();
+                                }}
+                            >
+                                Edit Title
+                            </MenuItem>*/}
+                            <MenuItem 
+                                _hover= {{ bg: '#e8d9c4' }} 
+                                _focus= {{ bg: '#e8d9c4' }} 
+                                onClick={(e) => {
+                                    e.stopPropagation(); 
+                                    handleDelete();
+                                }}
+                            >
+                                Delete
+                            </MenuItem>
+                        </MenuList>
+                    </Menu>
                 </Flex>
             </Flex>
-            <Modal isOpen={isOpen} onClose={onClose}>
+            <Modal 
+                isOpen={isOpen} 
+                onClose={onClose}
+                initialFocusRef={initialRef}
+            >
                 <ModalOverlay />
                 <ModalContent>
-                    <Dialog 
-                        title={title}
+                    <Dialog
+                        title={
+                            <Editable 
+                                defaultValue={title}
+                                onSubmit={handleEditTitle}
+                            >
+                                <EditablePreview mr='4px' cursor='pointer' />
+                                <EditableInput bg='white' autoFocus={false} />
+                                <EditableIcon ariaLabel='Edit Feature Title'/>
+                            </Editable>
+                        }
                         h='280px'
                         exit={onClose}
-                        header={
-                            <IconButton                                            
-                                aria-label='Delete Project'
-                                icon={<EditIcon />}
-                                colorScheme='blackAlpha'
-                                size='xs'
-                             />
-                        }
                     >
                         <ModalBody>
+                            {/*Gain focus when the modal opens and prevent The
+                            title from starting in edit mode*/}
+                            <div 
+                                ref={initialRef} 
+                                tabIndex={-1} 
+                                aria-hidden="true"
+                            />
                             <Flex 
                                 h='100%'
                                 flexDirection='column' 
                                 justifyContent='space-between'
                             >
                                 Description:
-                                <Flex 
-                                    bg='white' 
-                                    textIndent='4px' 
-                                    flexGrow={1} 
+                                <Flex
+                                    w='100%'
+                                    bg='white'
                                     border='2px' 
                                     borderColor='teal.500'
+                                    borderRadius='md'
                                 >
-                                    {description ?? 'Add a Description'}
+                                    <Editable 
+                                        w='100%'
+                                        h='100%'
+                                        defaultValue={
+                                            description || 'Add a description'
+                                        } 
+                                        onSubmit={handleEditDescription}
+                                    >
+                                        <EditablePreview 
+                                            ml='4px' 
+                                            mr='4px' 
+                                            cursor='pointer'
+                                        />
+                                        <Textarea
+                                            size='lg'
+                                            maxW='100%'
+                                            bg='white' 
+                                            padding='4px'
+                                            resize='none'
+                                            border='none'
+                                            as={EditableTextarea}
+                                        />
+                                        <EditableIcon 
+                                            ariaLabel='Edit Feature Description'
+                                        />
+                                    </Editable>
                                 </Flex>
                                 {userStories && userStories.length > 0 && 
                                     userStories.map((userStory, index) => (

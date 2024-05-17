@@ -4,23 +4,47 @@
  * project and is tied to a specific feature. It tracks the total number
  * tasks associated with it as well as the number of completed tasks.
  */
-import React, { MouseEvent, useState, useEffect } from 'react';
+import React, { PointerEvent, useState, useEffect, FormEvent } from 'react';
 import { 
     Box,
     Button,
     Flex,
+    HStack,
     useToast,
     Divider,
     Accordion,
     AccordionItem,
     AccordionButton,
     AccordionPanel,
-    AccordionIcon
+    AccordionIcon,
+    IconButton,
+    Modal,
+    ModalOverlay,
+    ModalContent,
+    ModalBody,
+    useDisclosure,
+    Menu,
+    MenuButton,
+    MenuList,
+    MenuItem,
+    Editable,
+    EditableInput,
+    EditablePreview,
+    Input,
+    FormControl,
+    FormLabel
 } from '@chakra-ui/react';
-import { useNavigate } from 'react-router-dom';
-import { StatusType, List, CreateTaskDTO } from '../types/types';
+import { useNavigate, Form } from 'react-router-dom';
+import { 
+    StatusType, 
+    List, 
+    CreateTaskDTO, 
+    UpdateUserStoryDTO 
+} from '../types/types';
 import { UpdateData } from '../api/calls';
 import TaskComponent from '../components/task-component';
+import { VscKebabVertical } from 'react-icons/vsc';
+import Dialog from '../components/dialog';
 
 interface UserStoryProps {
     id: string;
@@ -46,6 +70,12 @@ const UserStoryComponent = (props: UserStoryProps) => {
     } = props;
     const toast = useToast();
     const navigate = useNavigate();
+    const { isOpen, onOpen, onClose } = useDisclosure();
+    const { 
+        isOpen: isEditOpen, 
+        onOpen: onEditOpen, 
+        onClose: onEditClose 
+    } = useDisclosure();
     //Find this specific user story.
     const list = lists.find(list => list.id === listID);
     const feature = list? list.features.find(
@@ -87,7 +117,7 @@ const UserStoryComponent = (props: UserStoryProps) => {
     }, [lists, tasks])
     
     //Add a task to this user story.
-    const handleAddTask = async (event: MouseEvent<HTMLButtonElement>) => {
+    const handleAddTask = async (event: PointerEvent<HTMLButtonElement>) => {
         //Create an object with filler data for the new task.
         const DTO: CreateTaskDTO= {
             projectID: projectID,
@@ -176,27 +206,124 @@ const UserStoryComponent = (props: UserStoryProps) => {
         }
     }
     
+    //Edit the User Story title and description.
+    const handleEdit = (event: FormEvent<HTMLFormElement>) => {
+        /*Prevent the form from sending a traditional POST request when
+        submitted which would refresh the page needlessly*/
+        event.preventDefault();
+        const formData = new FormData(event.currentTarget as HTMLFormElement);
+        const newTitle = formData.get('title') as string;
+        const updateTitle = (newTitle === title) ? false : true; 
+        const newDescription = formData.get('description');
+        const currentDescription = description ?? 'Add a Description';
+        const updateDescription = (
+            newDescription === currentDescription
+        ) ? false : true; 
+        if (
+            (newTitle && updateTitle) || (newDescription && updateDescription)
+        ) {
+            //Create an object with the new user story data.
+            const DTO: UpdateUserStoryDTO = {
+                projectID: projectID,
+                listID: listID,
+                featureID: featureID,
+                id: id,
+                title: updateTitle ? newTitle as string : undefined,
+                description: (
+                    updateDescription ? newDescription as string : undefined
+                )
+            };
+            const message = (
+                'Update User Story ' + 
+                (updateTitle ? `title from ${title} to ${newTitle}` : '') + 
+                (updateTitle && updateDescription ? ' and ' : '') +
+                (
+                    newDescription ? (
+                        `description from ${description} to ${newDescription}` 
+                    ): (''
+                    )
+                )
+            )
+            toast({
+                title: 'Edit User Story',
+                description: message,
+                status: 'info' as StatusType,
+                duration: 4000,
+                isClosable: true
+            });
+        }
+    }
+    
+    //Delete the User Story and any associated Tasks.
+    const handleDelete = () => {
+        toast({
+            title: 'Delete User Story',
+            description: `Display delete User Story confirmation Modal`,
+            status: 'info' as StatusType,
+            duration: 4000,
+            isClosable: true
+        });
+    }
+    
     return (
         <Flex bg='teal.500' padding='2px' mt='8px'>
-            <Accordion allowToggle bg='white'  h='100%' w='100%'>
+            <Accordion allowToggle bg='white' h='100%' w='100%'>
                 <AccordionItem>
                     {({isExpanded}) => (
                         <>
-                            <AccordionButton>
-                                <Flex 
-                                    w='100%' 
-                                    mr='4px' 
-                                    justify='space-between'
-                                >
-                                    <Flex>
-                                        {title}
+                            <Flex align='center'>
+                                <AccordionButton style={{ flexGrow: 1 }}>
+                                    <Flex 
+                                        w='100%' 
+                                        mr='4px' 
+                                        justify='space-between'
+                                        alignItems='center'
+                                    >
+                                        <Flex>
+                                            {title}
+                                        </Flex>
+                                        <Flex>
+                                            {completedCount}/{taskCount}
+                                        </Flex>
                                     </Flex>
-                                    <Flex>
-                                        {completedCount}/{taskCount}
-                                    </Flex>
-                                </Flex>
-                                <AccordionIcon />
-                            </AccordionButton>
+                                    <AccordionIcon />
+                                </AccordionButton>
+                                <Menu>
+                                    <MenuButton 
+                                        as={IconButton} 
+                                        aria-label='User Story Settings'
+                                        icon={
+                                            <Box w='10px' h='16px' mr='4px'>
+                                                <VscKebabVertical size='100%'/>
+                                            </Box>
+                                        }
+                                        bg='white'
+                                        _hover={{ bg: '' }}
+                                        _active={{ bg: '' }}
+                                        size='xs'
+                                        mr='4px'
+                                        h='100%'
+                                    >
+                                        Actions
+                                    </MenuButton>
+                                    <MenuList>
+                                        <MenuItem 
+                                            _hover= {{ bg: '#e8d9c4' }}
+                                            _focus= {{ bg: '#e8d9c4' }}
+                                            onClick={onEditOpen}
+                                        >
+                                            Edit
+                                        </MenuItem>
+                                        <MenuItem 
+                                            _hover= {{ bg: '#e8d9c4' }} 
+                                            _focus= {{ bg: '#e8d9c4' }}
+                                            onClick={handleDelete}
+                                        >
+                                            Delete
+                                        </MenuItem>
+                                    </MenuList>
+                                </Menu>
+                            </Flex>
                             {isExpanded && <Divider border='1px' />}
                             <AccordionPanel padding={0}>
                                 <Flex 
@@ -204,26 +331,30 @@ const UserStoryComponent = (props: UserStoryProps) => {
                                     flexDirection='column' 
                                     justify='space-between'
                                 >
-                                    <Flex flexGrow={1} flexDirection='column'>
-                                        <Box>
-                                            {description ?? 
-                                                'Add a Description'
-                                            }
-                                        </Box>
-                                        {tasks && tasks.length > 0 && tasks.map(
-                                            (task, index) => (
-                                                <TaskComponent 
-                                                    key={task.id}
-                                                    id={task.id}
-                                                    projectID={projectID}
-                                                    listID={listID}
-                                                    featureID={featureID}
-                                                    userStoryID={id}
-                                                    lists={lists}
-                                                    setLists={setLists}
-                                                />
+                                    <Flex 
+                                        ml='16px'
+                                        mr='16px'
+                                        mb='8px'
+                                        flexGrow={1} 
+                                        flexDirection='column'
+                                    >
+                                        {description || 'Add a Description'}
+                                        {tasks && tasks.length > 0 && 
+                                            tasks.map(
+                                                (task, index) => (
+                                                    <TaskComponent 
+                                                        key={task.id}
+                                                        id={task.id}
+                                                        projectID={projectID}
+                                                        listID={listID}
+                                                        featureID={featureID}
+                                                        userStoryID={id}
+                                                        lists={lists}
+                                                        setLists={setLists}
+                                                    />
+                                                )
                                             )
-                                        )}
+                                        }
                                     </Flex>
                                     <Divider border='1px'/>
                                     <Button 
@@ -238,6 +369,118 @@ const UserStoryComponent = (props: UserStoryProps) => {
                     )}
                 </AccordionItem>
             </Accordion>
+            <Modal size='xl' isOpen={isOpen} onClose={onClose}>
+                <ModalOverlay />
+                <ModalContent mt='5%' maxW='650px'>
+                    <Dialog
+                        w='100%'
+                        title={
+                            <div style={{ 
+                                width: '600px',
+                                background: 'white',
+                                border: '1px solid teal',
+                                marginLeft: '4px'
+                            }}>
+                                {'Are you sure you want to delete this user '}
+                                {'story:'}
+                                <br />
+                                {`"${title}"`}
+                            </div>
+                        }
+                        exit={onClose}
+                    >
+                        <ModalBody p='0' ml='4px' mr='32px'>
+                            <Flex 
+                                h='100%'
+                                flexDirection='column' 
+                                align='center'
+                                justifyContent='space-between'
+                            >
+                                <Box 
+                                    w='500px' 
+                                    ml='8px' 
+                                    border='1px' 
+                                    bg='white' 
+                                    textAlign='center' 
+                                    textColor='red'
+                                    fontSize='14px'
+                                    fontWeight='bold'
+                                >
+                                    This will also delete all tasks associated 
+                                    with this user story. <br /> This cannot be 
+                                    undone!
+                                </Box>
+                                <HStack mt='8px' mb='8px' justify='center'>
+                                    <Button 
+                                        colorScheme='red' 
+                                        onClick={handleDelete}
+                                    >
+                                        Delete
+                                    </Button>
+                                    <Button>
+                                        Cancel
+                                    </Button>
+                                </HStack>
+                            </Flex>
+                        </ModalBody>
+                    </Dialog>
+                </ModalContent>
+            </Modal>
+            <Modal isOpen={isEditOpen} onClose={onEditClose}>
+                <ModalOverlay />
+                <ModalContent mt='5%'>
+                    <Dialog
+                        w='100%'
+                        title={`Edit User Story: ${title}`}
+                        exit={onEditClose}
+                    >
+                        <ModalBody>
+                            <Flex 
+                                h='100%'
+                                flexDirection='column' 
+                                justifyContent='space-between'
+                            >
+                                <Form onSubmit={(event) => { 
+                                    handleEdit(event); 
+                                    onEditClose();
+                                }}>
+                                    <FormControl>
+                                        <FormLabel>
+                                            Title:
+                                        </FormLabel>
+                                        <Input 
+                                            name='title' 
+                                            bg='white' 
+                                            placeholder={title} 
+                                        />
+                                    </FormControl>
+                                    <FormControl>
+                                        <FormLabel>
+                                            Description:
+                                        </FormLabel>
+                                        <Input 
+                                            name='description' 
+                                            bg='white' 
+                                            placeholder={description}
+                                        />
+                                    </FormControl>
+                                    <HStack mt='8px' justifyContent='center'>
+                                        <Button 
+                                            type='submit' 
+                                            colorScheme='blue'
+                                        >
+                                            Update
+                                        </Button>
+                                        <Button onClick={onEditClose}>
+                                            Cancel
+                                        </Button>
+                                    </HStack>
+                                </Form>
+                            </Flex>
+                        </ModalBody>
+                    </Dialog>
+                </ModalContent>
+            </Modal>
         </Flex>
     )
 }

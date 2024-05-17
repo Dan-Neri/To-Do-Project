@@ -9,7 +9,7 @@ interface PageProps {
     w?: string;
     h?: string;
     bg?: string;
-    title?: string;
+    title?: string | JSX.Element;
     align?: string;
     justify?: string;
     children?: ReactNode;

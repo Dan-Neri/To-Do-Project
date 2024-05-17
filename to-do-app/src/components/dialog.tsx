@@ -14,7 +14,8 @@ import { useNavigate } from 'react-router-dom';
 interface DialogProps {
     w?: string;
     h?: string;
-    title?: string;
+    title?: string | JSX.Element;
+    bg?: string;
     exit?: () => void;
     align?: 'top' | 'center';
     header?: ReactNode | undefined;
@@ -23,8 +24,9 @@ interface DialogProps {
 
 const Dialog = (props: DialogProps ) => {
     const { 
-        w='500px', 
+        w='500px',
         title='', 
+        bg='tan',
         exit,
         align='top',
         header,
@@ -49,7 +51,7 @@ const Dialog = (props: DialogProps ) => {
             <Flex
                 w='100%'
                 h='100%'
-                bg='tan'
+                bg={bg}
                 flexDirection='column'
             >
                 <Flex mt='1' h='12%'>
@@ -60,8 +62,10 @@ const Dialog = (props: DialogProps ) => {
                         alignItems='center'
                         textAlign='center'
                     >
-                        {title}
-                        {header && <Flex ml='4px'>{header}</Flex>}
+                        <>
+                            {title}
+                            {header && <Flex ml='4px'>{header}</Flex>}
+                        </>
                     </Flex>
                     <Box justifyContent='right'>
                         <Flex padding='1'>

@@ -11,7 +11,7 @@ import {
     RouterProvider,
     Route
 } from "react-router-dom";
-import ErrorPage from './error-page';
+import ErrorPage from './routes/error-page';
 import TopMenu from './routes/top-menu';
 import Index from './routes/index';
 import SignUp, { action as signUpAction } from './routes/sign-up';

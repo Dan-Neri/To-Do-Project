@@ -7,10 +7,21 @@
  * project should signal the completion of the entire project.
  */
 import React, { useState, useEffect, ChangeEvent } from 'react';
-import { useToast, Checkbox } from '@chakra-ui/react';
+import { 
+    useToast, 
+    Checkbox, 
+    Flex, 
+    Box, 
+    IconButton, 
+    Editable,
+    EditableInput,
+    EditablePreview 
+} from '@chakra-ui/react';
 import { useNavigate } from 'react-router-dom';
 import { StatusType, List, UpdateTaskDTO } from '../types/types';
 import { UpdateData } from '../api/calls';
+import { DeleteIcon } from '@chakra-ui/icons';
+import EditableIcon from '../components/editable-icon';
 
 interface TaskProps {
     id: string;
@@ -67,7 +78,7 @@ const TaskComponent = (props: TaskProps) => {
     }, [lists, id, listID, featureID, userStoryID])
     
     //Mark this task completed or uncompleted.
-    const handleCheckTask = async (event: ChangeEvent<HTMLInputElement>) => {
+    const handleCheck = async (event: ChangeEvent<HTMLInputElement>) => {
         //Create an object with locator data and completion status.
         const DTO: UpdateTaskDTO = {
             projectID: projectID,
@@ -153,10 +164,57 @@ const TaskComponent = (props: TaskProps) => {
         }
     }
     
+    //Update the Task content.
+    const handleEditContent = (nextValue: string) => {
+        const currentValue = content ?? 'New Task';
+        if (nextValue !== currentValue) {
+            toast({
+                title: 'Update Task Content',
+                description: `Change the Task content from ${currentValue} to ${nextValue}`,
+                status: 'info' as StatusType,
+                duration: 4000,
+                isClosable: true
+            });
+        }
+    }
+    
+    //Delete the Task.
+    const handleDelete = () => {
+        toast({
+            title: 'Delete Task',
+            description: `Display delete Task confirmation Modal`,
+            status: 'info' as StatusType,
+            duration: 4000,
+            isClosable: true
+        });
+    }
+    
     return (
-        <Checkbox key={id} isChecked={completed} onChange={handleCheckTask}>
-            {content}
-        </Checkbox>
+        <Flex key={id} justify='space-between' alignItems='center'>
+            <Flex w='100%' mr='8px'>
+                <Checkbox isChecked={completed} onChange={handleCheck} />
+                <Editable 
+                    w='100%' 
+                    ml='4px' 
+                    defaultValue={content} 
+                    onSubmit={handleEditContent}
+                >
+                    <EditablePreview ml='4px' mr='4px' />
+                    <EditableInput ml='4px' />
+                    <EditableIcon ariaLabel='Edit Task Content'/>
+                </Editable>
+            </Flex>
+            <Box>
+                <IconButton 
+                    aria-label='Delete Project'
+                    icon={<DeleteIcon />}
+                    colorScheme='blackAlpha'
+                    size='xs'
+                    mr='4px'
+                    onClick={handleDelete}
+                />
+            </Box>
+        </Flex>
     )
 }
 
