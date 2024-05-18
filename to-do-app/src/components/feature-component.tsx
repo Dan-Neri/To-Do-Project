@@ -31,7 +31,12 @@ import {
 } from '@chakra-ui/react';
 import { useNavigate, Form } from 'react-router-dom';
 import Dialog from '../components/dialog';
-import { StatusType, List, CreateUserStoryDTO } from '../types/types';
+import { 
+    StatusType, 
+    List, 
+    CreateUserStoryDTO, 
+    UpdateFeatureDTO 
+} from '../types/types';
 import { EditIcon } from '@chakra-ui/icons';
 import { UpdateData } from '../api/calls';
 import UserStoryComponent from '../components/user-story-component';
@@ -194,30 +199,159 @@ const FeatureComponent = (props: FeatureProps) => {
     }
     
     //Update the Feature title.
-    const handleEditTitle = (nextValue: string) => {
+    const handleEditTitle = async (nextValue: string) => {
         const currentValue = title ?? 'Add a title';
+        //Only update the title when it is different from the current title.
         if (nextValue !== currentValue) {
-            toast({
-                title: 'Update Feature Title',
-                description: `Change the Feature title from ${currentValue} to ${nextValue}`,
-                status: 'info' as StatusType,
-                duration: 4000,
-                isClosable: true
-            });
+            //Create an object with locator data and the new title.
+            const DTO: UpdateFeatureDTO = {
+                projectID: projectID,
+                listID: listID,
+                id: id,
+                title: nextValue
+            }
+            try {
+                /*Send a POST request to the back-end API to update the 
+                feature title.*/
+                const response = await UpdateData(
+                        `/features/update`,
+                        DTO
+                );
+                if (response) {
+                    /*Find a path to this specific feature from the main lists 
+                    state.*/
+                    const listIndex = lists.findIndex(
+                        list => list.id === listID
+                    );
+                    const featureIndex = listIndex > -1? (
+                        lists[listIndex].features.findIndex(
+                            feature => feature.id === id
+                        )
+                    ) : (
+                        -1
+                    );
+                    //Throw an error if the feature is not found.
+                    if (featureIndex === -1) {
+                        toast({
+                            title: 'Error',
+                            description: 'Unable to find feature',
+                            status: 'error' as StatusType,
+                            duration: 4000,
+                            isClosable: true
+                        });
+                    }
+                    //Create a copy of the entire lists state.
+                    const newLists = lists.slice();
+                    //Replace this specific feature.
+                    newLists[listIndex].features[featureIndex] = response.data;
+                    setLists(newLists);
+                }
+            } catch (error: any) {
+                if(error.response) {
+                    toast({
+                        title: 'Error',
+                        description: error.response.data.message,
+                        status: 'error' as StatusType,
+                        duration: 4000,
+                        isClosable: true
+                    });
+                    if(error.response.data.message.includes('Authorization')) {
+                        navigate('/sign-in')
+                        return;
+                    }
+                } else {
+                    toast({
+                        title: 'Error',
+                        description: error.message,
+                        status: 'error' as StatusType,
+                        duration: 4000,
+                        isClosable: true
+                    });
+                }
+                if(error.message.includes('Authorization')) {
+                    navigate('/sign-in');
+                    return;
+                }
+            }
         }
     }
     
     //Update the Feature description.
-    const handleEditDescription = (nextValue: string) => {
+    const handleEditDescription = async (nextValue: string) => {
         const currentValue = description ?? 'Add a description';
+        /*Only update the description when it is different from the current 
+        description.*/
         if (nextValue !== currentValue) {
-            toast({
-                title: 'Update Feature description',
-                description: `Change the Feature description from ${currentValue} to ${nextValue}`,
-                status: 'info' as StatusType,
-                duration: 4000,
-                isClosable: true
-            });
+            //Create an object with locator data and the new description.
+            const DTO: UpdateFeatureDTO = {
+                projectID: projectID,
+                listID: listID,
+                id: id,
+                description: nextValue
+            }
+            try {
+                /*Send a POST request to the back-end API to update the 
+                feature description.*/
+                const response = await UpdateData(
+                        `/features/update`,
+                        DTO
+                );
+                if (response) {
+                    /*Find a path to this specific feature from the main lists 
+                    state.*/
+                    const listIndex = lists.findIndex(
+                        list => list.id === listID
+                    );
+                    const featureIndex = listIndex > -1? (
+                        lists[listIndex].features.findIndex(
+                            feature => feature.id === id
+                        )
+                    ) : (
+                        -1
+                    );
+                    //Throw an error if the feature is not found.
+                    if (featureIndex === -1) {
+                        toast({
+                            title: 'Error',
+                            description: 'Unable to find feature',
+                            status: 'error' as StatusType,
+                            duration: 4000,
+                            isClosable: true
+                        });
+                    }
+                    //Create a copy of the entire lists state.
+                    const newLists = lists.slice();
+                    //Replace this specific feature.
+                    newLists[listIndex].features[featureIndex] = response.data;
+                    setLists(newLists);
+                }
+            } catch (error: any) {
+                if(error.response) {
+                    toast({
+                        title: 'Error',
+                        description: error.response.data.message,
+                        status: 'error' as StatusType,
+                        duration: 4000,
+                        isClosable: true
+                    });
+                    if(error.response.data.message.includes('Authorization')) {
+                        navigate('/sign-in')
+                        return;
+                    }
+                } else {
+                    toast({
+                        title: 'Error',
+                        description: error.message,
+                        status: 'error' as StatusType,
+                        duration: 4000,
+                        isClosable: true
+                    });
+                }
+                if(error.message.includes('Authorization')) {
+                    navigate('/sign-in');
+                    return;
+                }
+            }
         }
     }
     

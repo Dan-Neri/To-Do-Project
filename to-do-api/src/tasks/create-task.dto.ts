@@ -6,9 +6,7 @@ import { IsNotEmpty } from 'class-validator';
 import { Transform } from 'class-transformer';
 import * as sanitizeHtml  from 'sanitize-html';
 
-export class CreateTaskDTO {
-    _id?: string;
-    
+export class CreateTaskDTO { 
     @IsNotEmpty()
     @Transform((params) => sanitizeHtml(params.value, { 
         allowedTags: [], 

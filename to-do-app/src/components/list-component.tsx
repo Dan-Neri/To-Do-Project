@@ -23,7 +23,12 @@ import {
     EditablePreview
 } from '@chakra-ui/react';
 import { useNavigate, Form } from 'react-router-dom';
-import { StatusType, List, CreateFeatureDTO } from '../types/types';
+import { 
+    StatusType, 
+    List, 
+    CreateFeatureDTO, 
+    UpdateListDTO 
+} from '../types/types';
 import Dialog from '../components/dialog';
 import { UpdateData } from '../api/calls';
 import FeatureComponent from '../components/feature-component';
@@ -132,16 +137,71 @@ const ListComponent = (props: ListProps) => {
         }
     }
     
-    const handleEditTitle = (nextValue: string) => {
+    const handleEditTitle = async (nextValue: string) => {
         const currentValue = title ?? 'Add a Title';
+        //Only update the title when it is different from the current title.
         if (nextValue !== currentValue) {
-            toast({
-                title: 'Update List Title',
-                description: `Change the List title from ${currentValue} to ${nextValue}`,
-                status: 'info' as StatusType,
-                duration: 4000,
-                isClosable: true
-            });
+            //Create an object with locator data and the new title.
+            const DTO: UpdateListDTO = {
+                projectID: projectID,
+                id: id,
+                title: nextValue
+            }
+            try {
+                /*Send a POST request to the back-end API to update the 
+                list title.*/
+                const response = await UpdateData(
+                        `/lists/update`,
+                        DTO
+                );
+                if (response) {
+                    /*Find this specific list in the main lists state.*/
+                    const listIndex = lists.findIndex(
+                        list => list.id === id
+                    );
+                    //Throw an error if the list is not found.
+                    if (listIndex === -1) {
+                        toast({
+                            title: 'Error',
+                            description: 'Unable to find list',
+                            status: 'error' as StatusType,
+                            duration: 4000,
+                            isClosable: true
+                        });
+                    }
+                    //Create a copy of the entire lists state.
+                    const newLists = lists.slice();
+                    //Replace this specific list.
+                    newLists[listIndex] = response.data;
+                    setLists(newLists);
+                }
+            } catch (error: any) {
+                if(error.response) {
+                    toast({
+                        title: 'Error',
+                        description: error.response.data.message,
+                        status: 'error' as StatusType,
+                        duration: 4000,
+                        isClosable: true
+                    });
+                    if(error.response.data.message.includes('Authorization')) {
+                        navigate('/sign-in')
+                        return;
+                    }
+                } else {
+                    toast({
+                        title: 'Error',
+                        description: error.message,
+                        status: 'error' as StatusType,
+                        duration: 4000,
+                        isClosable: true
+                    });
+                }
+                if(error.message.includes('Authorization')) {
+                    navigate('/sign-in');
+                    return;
+                }
+            }
         }
     }
     

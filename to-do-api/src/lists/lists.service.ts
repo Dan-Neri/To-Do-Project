@@ -15,6 +15,7 @@ import { Repository } from 'typeorm';
 import { List } from '../lists/list.entity';
 import { ProjectsService } from '../projects/projects.service';
 import { CreateListDTO } from './create-list.dto';
+import { UpdateListDTO } from './update-list.dto';
  
 @Injectable()
 export class ListsService {
@@ -52,6 +53,30 @@ export class ListsService {
         
         project.lists.push(newList);
         return project.lists;
+    }
+  
+    /*Take a userID and list update data. Change the specified 
+    information for the given list and return it. Throw an error if a 
+    matching list cannot be found.*/
+    async update(
+        userID: string, 
+        DTO: UpdateListDTO
+    ): Promise<List> {
+        const project = await this.projectsService.findByID(
+            userID, 
+            DTO.projectID
+        );
+        const list = project.lists.find((list) => list.id === DTO.id);
+        if (!list) {
+            throw new BadRequestException('Invalid list');
+        }
+        list.title = DTO.title ?? list.title;
+        list.position = DTO.position ?? list.position;
+        list.features = DTO.features ?? list.features;
+        
+        const newList = await this.listsRepository.save(list);
+        
+        return newList;
     }
     
     //Remove a list with a matching id from the database.

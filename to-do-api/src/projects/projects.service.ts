@@ -18,6 +18,7 @@ import { List } from '../lists/list.entity';
 import { UsersService } from '../users/users.service';
 import { ListsService } from '../lists/lists.service';
 import { CreateProjectDTO } from './create-project.dto';
+import { UpdateProjectDTO } from './update-project.dto';
  
 @Injectable()
 export class ProjectsService {
@@ -56,9 +57,9 @@ export class ProjectsService {
         return project;
     }
     
-    /*Take a userID and new project information. Create a corresponding 
-    project Object, save that object in the database, and return it. 
-    Throw an error if a matching userAccount is not found.*/
+    /*Take a userID and new project data. Create a corresponding project 
+    object, save that object in the database, and return it. Throw an 
+    error if a matching userAccount is not found.*/
     async create(
         userID: string, 
         DTO: CreateProjectDTO
@@ -80,6 +81,29 @@ export class ProjectsService {
         );
         
         return project;
+    }
+    
+    /*Take a userID and project update data. Change the specified 
+    information for the given project and return it. Throw an error if a 
+    matching project cannot be found.*/
+    async update(
+        userID: string, 
+        DTO: UpdateProjectDTO
+    ): Promise<Project> {
+        const project = await this.findByID(
+            userID, 
+            DTO.id
+        );
+        if (!project) {
+            throw new BadRequestException('Invalid project');
+        }
+        project.title = DTO.title ?? project.title;
+        project.description = DTO.description ?? project.description;
+        project.lists = DTO.lists ?? project.lists;
+        
+        const newProject = await this.projectsRepository.save(project);
+        
+        return newProject;
     }
     
     //Remove a project with a matching id from the database.

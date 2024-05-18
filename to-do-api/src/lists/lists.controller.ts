@@ -15,7 +15,8 @@ import {
 import { ListsService } from './lists.service';
 import { List } from '../lists/list.entity';
 import { AuthGuard, RequestWithUser } from '../auth/auth.guard';
-import { CreateListDTO } from './create-list.dto'
+import { CreateListDTO } from './create-list.dto';
+import { UpdateListDTO } from './update-list.dto';
 
 @Controller('lists')
 export class ListsController {
@@ -31,5 +32,17 @@ export class ListsController {
         @Body() DTO: CreateListDTO
     ): Promise<List[]> {
         return this.listsService.create(req.user.sub, DTO);
+    }
+    
+    /*Take an access token in the request header and a DTO containing
+    list update data in the body. Update the specified information in 
+    the given list.*/
+    @UseGuards(AuthGuard)
+    @Post('/update')
+    update(
+        @Request() req: RequestWithUser,
+        @Body() DTO: UpdateListDTO
+    ): Promise<List> {
+        return this.listsService.update(req.user.sub, DTO);
     }
 }

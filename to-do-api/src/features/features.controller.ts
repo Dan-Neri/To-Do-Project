@@ -16,6 +16,7 @@ import { FeaturesService } from './features.service';
 import { Feature } from './feature.entity';
 import { CreateFeatureDTO } from './create-feature.dto';
 import { AuthGuard, RequestWithUser } from '../auth/auth.guard';
+import { UpdateFeatureDTO } from './update-feature.dto';
 
 @Controller('features')
 export class FeaturesController {
@@ -33,5 +34,17 @@ export class FeaturesController {
         @Body() DTO: CreateFeatureDTO 
     ): Promise<Feature[]> {
         return this.featuresService.create(req.user.sub, DTO);
+    }
+    
+    /*Take an access token in the request header and a DTO containing
+    feature update information in the body. Update the specified
+    information in the given feature.*/
+    @UseGuards(AuthGuard)
+    @Post('/update')
+    update(
+        @Request() req: RequestWithUser,
+        @Body() DTO: UpdateFeatureDTO
+    ): Promise<Feature> {
+        return this.featuresService.update(req.user.sub, DTO);
     }
 }

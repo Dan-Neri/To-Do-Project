@@ -14,6 +14,7 @@ import { Repository } from 'typeorm';
 import { UserStory } from './user-story.entity';
 import { ProjectsService } from '../projects/projects.service';
 import { CreateUserStoryDTO } from './create-user-story.dto';
+import { UpdateUserStoryDTO } from './update-user-story.dto';
  
 @Injectable()
 export class UserStoriesService {
@@ -57,6 +58,42 @@ export class UserStoriesService {
         
         feature.userStories.push(newUserStory);
         return feature.userStories;
+    }
+    
+    /*Take a userID and user story update data. Change the specified 
+    data for the given user story and return it. Throw an error if a 
+    matching task cannot be found.*/
+    async update(
+        userID: string, 
+        DTO: UpdateUserStoryDTO
+    ): Promise<UserStory> {
+        const project = await this.projectsService.findByID(
+            userID, 
+            DTO.projectID
+        );
+        const list = project.lists.find((list) => list.id === DTO.listID);
+        if (!list) {
+            throw new BadRequestException('Invalid list');
+        }
+        const feature = list.features.find(
+        (feature) => feature.id === DTO.featureID
+        );
+        if (!feature) {
+            throw new BadRequestException('Invalid feature');
+        }
+        const userStory = feature.userStories.find(
+            (userStory) => userStory.id === DTO.id
+        );
+        if (!userStory) {
+            throw new BadRequestException('Invalid user story');
+        }
+        userStory.title = DTO.title ?? userStory.title;
+        userStory.description = DTO.description ?? userStory.description;
+        userStory.tasks = DTO.tasks ?? userStory.tasks;
+        
+        const newStory = await this.userStoriesRepository.save(userStory);
+        
+        return newStory;
     }
     
     //Remove a project with a matching id from the database.

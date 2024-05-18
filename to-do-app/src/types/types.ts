@@ -33,7 +33,7 @@ export interface User {
     lastName: string;
     username: string;
     email: string;
-    projects: Project[]
+    projects: Project[];
 }
 
 //An interface describing the transfer object used to create a new User.
@@ -60,7 +60,7 @@ export interface Project {
     id: string;
     title: string;
     description: string;
-    lists: List[]
+    lists: List[];
 }
 
 //An interface describing the transfer object used to create a new project.
@@ -98,6 +98,7 @@ export interface UpdateListDTO {
     id: string;
     projectID: string;
     title?: string;
+    features?: Feature[];
 }
 
 //An interface describing a feature.
@@ -115,7 +116,7 @@ export interface CreateFeatureDTO {
     listID: string;
     title: string;
     description?: string;
-    userStories?: UserStory[]
+    userStories?: UserStory[];
 }
 
 /*An interface describing the transfer object used to update an existing 
@@ -127,7 +128,7 @@ export interface UpdateFeatureDTO {
     title?: string;
     description?: string;
     position?: number;
-    userStories?: UserStory[]
+    userStories?: UserStory[];
 }
 
 //An interface describing a user story.
@@ -157,7 +158,7 @@ export interface UpdateUserStoryDTO {
     title?: string;
     description?: string;
     position?: number;
-    tasks?: Task[]
+    tasks?: Task[];
 }
 
 //An interface describing a task.

@@ -130,7 +130,7 @@ const TaskComponent = (props: TaskProps) => {
                 }
                 //Create a copy of the entire lists state.
                 const newLists = lists.slice();
-                //Update the completion status of this specific task.
+                //Replace this specific task.
                 newLists[listIndex].features[featureIndex].userStories[
                   storyIndex].tasks[taskIndex] = response.data;
                 setLists(newLists);
@@ -165,16 +165,96 @@ const TaskComponent = (props: TaskProps) => {
     }
     
     //Update the Task content.
-    const handleEditContent = (nextValue: string) => {
+    const handleEditContent = async (nextValue: string) => {
         const currentValue = content ?? 'New Task';
+        /*Only update the content when it is different from the current 
+        content.*/
         if (nextValue !== currentValue) {
-            toast({
-                title: 'Update Task Content',
-                description: `Change the Task content from ${currentValue} to ${nextValue}`,
-                status: 'info' as StatusType,
-                duration: 4000,
-                isClosable: true
-            });
+            //Create an object with locator content data.
+            const DTO: UpdateTaskDTO = {
+                projectID: projectID,
+                listID: listID,
+                featureID: featureID,
+                userStoryID: userStoryID,
+                id: id,
+                content: nextValue
+            }
+            try {
+                /*Send a POST request to the back-end API to update the 
+                task content.*/
+                const response = await UpdateData(
+                        `/tasks/update`,
+                        DTO
+                );
+                if (response) {
+                    //Find a path to this specific task from the main lists state.
+                    const listIndex = lists.findIndex(
+                        list => list.id === listID
+                    );
+                    const featureIndex = listIndex > -1? (
+                        lists[listIndex].features.findIndex(
+                            feature => feature.id === featureID
+                        )
+                    ) : (
+                        -1
+                    );
+                    const storyIndex = featureIndex > -1? (
+                        lists[listIndex].features[
+                            featureIndex
+                        ].userStories.findIndex(
+                            userStory => userStory.id === userStoryID
+                        )
+                    ) : (-1);
+                    const taskIndex = storyIndex > -1? (
+                        lists[listIndex].features[featureIndex].userStories[
+                          storyIndex].tasks.findIndex(
+                            task => task.id === id
+                          )
+                    ) : (-1);
+                    //Throw an error if the task is not found.
+                    if (taskIndex === -1) {
+                        toast({
+                            title: 'Error',
+                            description: 'Unable to find task',
+                            status: 'error' as StatusType,
+                            duration: 4000,
+                            isClosable: true
+                        });
+                    }
+                    //Create a copy of the entire lists state.
+                    const newLists = lists.slice();
+                    //Replace this specific task.
+                    newLists[listIndex].features[featureIndex].userStories[
+                      storyIndex].tasks[taskIndex] = response.data;
+                    setLists(newLists);
+                }
+            } catch (error: any) {
+                if(error.response) {
+                    toast({
+                        title: 'Error',
+                        description: error.response.data.message,
+                        status: 'error' as StatusType,
+                        duration: 4000,
+                        isClosable: true
+                    });
+                    if(error.response.data.message.includes('Authorization')) {
+                        navigate('/sign-in')
+                        return;
+                    }
+                } else {
+                    toast({
+                        title: 'Error',
+                        description: error.message,
+                        status: 'error' as StatusType,
+                        duration: 4000,
+                        isClosable: true
+                    });
+                }
+                if(error.message.includes('Authorization')) {
+                    navigate('/sign-in');
+                    return;
+                }
+            }
         }
     }
     

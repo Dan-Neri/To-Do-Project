@@ -207,7 +207,7 @@ const UserStoryComponent = (props: UserStoryProps) => {
     }
     
     //Edit the User Story title and description.
-    const handleEdit = (event: FormEvent<HTMLFormElement>) => {
+    const handleEdit = async (event: FormEvent<HTMLFormElement>) => {
         /*Prevent the form from sending a traditional POST request when
         submitted which would refresh the page needlessly*/
         event.preventDefault();
@@ -233,24 +233,86 @@ const UserStoryComponent = (props: UserStoryProps) => {
                     updateDescription ? newDescription as string : undefined
                 )
             };
-            const message = (
-                'Update User Story ' + 
-                (updateTitle ? `title from ${title} to ${newTitle}` : '') + 
-                (updateTitle && updateDescription ? ' and ' : '') +
-                (
-                    newDescription ? (
-                        `description from ${description} to ${newDescription}` 
-                    ): (''
-                    )
-                )
-            )
-            toast({
-                title: 'Edit User Story',
-                description: message,
-                status: 'info' as StatusType,
-                duration: 4000,
-                isClosable: true
-            });
+            try {
+                /*Send a POST request to the back-end API to update the user 
+                story.*/
+                const response = await UpdateData(
+                        `/user-stories/update`,
+                        DTO
+                );
+                if (response) {
+                    /*Find a path to this specific user story from the main 
+                    lists state.*/
+                    const listIndex = lists.findIndex(
+                        list => list.id === listID
+                    );
+                    const featureIndex = listIndex > -1? (
+                        lists[listIndex].features.findIndex(
+                            feature => feature.id === featureID
+                        )
+                    ) : (
+                        -1
+                    );
+                    const storyIndex = featureIndex > -1? (
+                        lists[
+                            listIndex
+                        ].features[
+                            featureIndex
+                        ].userStories.findIndex(
+                            userStory => userStory.id === id
+                        )
+                    ) : (
+                        -1
+                    );
+                    //Throw an error if the user story is not found.
+                    if (storyIndex === -1) {
+                        toast({
+                            title: 'Error',
+                            description: 'Unable to find user story',
+                            status: 'error' as StatusType,
+                            duration: 4000,
+                            isClosable: true
+                        });
+                    }
+                    //Create a copy of the entire lists state.
+                    const newLists = lists.slice();
+                    //Replace this specific user story.
+                    newLists[
+                        listIndex
+                    ].features[
+                        featureIndex
+                    ].userStories[
+                        storyIndex
+                    ] = response.data;
+                    setLists(newLists);
+                }
+            } catch (error: any) {
+                if(error.response) {
+                    toast({
+                        title: 'Error',
+                        description: error.response.data.message,
+                        status: 'error' as StatusType,
+                        duration: 4000,
+                        isClosable: true
+                    });
+                    if(error.response.data.message.includes('Authorization')) {
+                        navigate('/sign-in')
+                        return;
+                    }
+                } else {
+                    toast({
+                        title: 'Error',
+                        description: error.message,
+                        status: 'error' as StatusType,
+                        duration: 4000,
+                        isClosable: true
+                    });
+                }
+                if(error.message.includes('Authorization')) {
+                    navigate('/sign-in');
+                    return;
+                }
+            }
         }
     }
     

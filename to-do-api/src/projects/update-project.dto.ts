@@ -5,6 +5,7 @@
 import { IsNotEmpty } from 'class-validator';
 import { Transform } from 'class-transformer';
 import * as sanitizeHtml  from 'sanitize-html';
+import { List } from '../lists/list.entity';
 
 export class UpdateProjectDTO {
     @IsNotEmpty()
@@ -25,4 +26,6 @@ export class UpdateProjectDTO {
         allowedAttributes: {}
     }))
     description?: string;
+    
+    lists?: List[];
 }

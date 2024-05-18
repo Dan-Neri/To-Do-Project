@@ -14,7 +14,7 @@ import { Repository } from 'typeorm';
 import { Feature } from './feature.entity';
 import { CreateFeatureDTO } from './create-feature.dto';
 import { ProjectsService } from '../projects/projects.service';
-
+import { UpdateFeatureDTO } from './update-feature.dto';
  
 @Injectable()
 export class FeaturesService {
@@ -24,8 +24,8 @@ export class FeaturesService {
         private projectsService: ProjectsService,
     ) {}
     
-    /*Take a userID and new project information. Create a corresponding 
-    project Object, save that object in the database, and return it. 
+    /*Take a userID and new feature data. Create a corresponding feature 
+    object, save that object in the database, and return it. 
     Throw an error if it is not possible to determine exactly where the 
     new feature should be created in the project workflow.*/
     async create(
@@ -56,6 +56,37 @@ export class FeaturesService {
         
         list.features.push(newFeature);
         return list.features;
+    }
+    
+    /*Take a userID and feature update data. Change the specified data 
+    for the given feature and return it. Throw an error if a matching 
+    feature cannot be found.*/
+    async update(
+        userID: string, 
+        DTO: UpdateFeatureDTO
+    ): Promise<Feature> {
+        const project = await this.projectsService.findByID(
+            userID, 
+            DTO.projectID
+        );
+        const list = project.lists.find((list) => list.id === DTO.listID);
+        if (!list) {
+            throw new BadRequestException('Invalid list');
+        }
+        const feature = list.features.find(
+        (feature) => feature.id === DTO.id
+        );
+        if (!feature) {
+            throw new BadRequestException('Invalid feature');
+        }
+        feature.title = DTO.title ?? feature.title;
+        feature.description = DTO.description ?? feature.description;
+        feature.position = DTO.position ?? feature.position;
+        feature.userStories = DTO.userStories ?? feature.userStories;
+        
+        const newFeature = await this.featuresRepository.save(feature);
+        
+        return newFeature;
     }
     
     //Remove a feature with a matching id from the database.

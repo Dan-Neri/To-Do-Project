@@ -26,7 +26,13 @@ import {
 import Page from '../components/page';
 import ListComponent from '../components/list-component';
 import { FetchData, UpdateData } from '../api/calls';
-import { StatusType, Project, List, CreateListDTO } from '../types/types';
+import { 
+    StatusType, 
+    Project, 
+    UpdateProjectDTO, 
+    List, 
+    CreateListDTO 
+} from '../types/types';
 import { AddIcon } from '@chakra-ui/icons';
 import { EditIcon } from '@chakra-ui/icons';
 import EditableIcon from '../components/editable-icon';
@@ -40,6 +46,8 @@ export default function ProjectInfo() {
     /*Track the state all lists which amounts to the entirety of the 
     project workflow data.*/
     const [lists, setLists] = useState<List[]>([]);
+    const [title, setTitle] = useState(project.title);
+    const [description, setDescription] = useState(project.description);
 
     /*useEffect(() => {
         const featureDrag = featureRef.current;
@@ -55,6 +63,8 @@ export default function ProjectInfo() {
                 (a: List, b: List) => a.position - b.position
             );
             setLists(sortedLists);
+            setTitle(project.title);
+            setDescription(project.description);
         }
     }, [project]);
     
@@ -109,33 +119,94 @@ export default function ProjectInfo() {
     }
     
     //Update the project title.
-    const handleEditTitle = (nextValue: string) => {
-        /*TO-DO: Implement logic to make a call to the API and update
-        lthe project title.*/
+    const handleEditTitle = async (nextValue: string) => {
+        //Only update the title when it is different from the current title.
         if (nextValue !== project.title) {
-            toast({
-                title: 'Update the project description',
-                description: `Change the description from ${project.title} to ${nextValue}`,
-                status: 'info' as StatusType,
-                duration: 4000,
-                isClosable: true
-            });
+            const DTO: UpdateProjectDTO = {
+                id: project.id,
+                title: nextValue
+            }
+            try {
+                const response = await UpdateData(
+                    `/projects/update`,
+                    DTO
+                );
+                if (response) {
+                    project.title = response.data.title;
+                }
+            } catch (error: any) {
+                if(error.response) {
+                    toast({
+                        title: 'Error',
+                        description: error.response.data.message,
+                        status: 'error' as StatusType,
+                        duration: 4000,
+                        isClosable: true
+                    });
+                    if(error.response.data.message.includes('Authorization')) {
+                        navigate('/sign-in');
+                        return;
+                    }
+                } else {
+                    toast({
+                        title: 'Error',
+                        description: error.message,
+                        status: 'error' as StatusType,
+                        duration: 4000,
+                        isClosable: true
+                    });
+                }
+                if(error.message.includes('Authorization')) {
+                    navigate('/sign-in');
+                    return;
+                }
+            }
         }
     }
     
     //Update the project description.
-    const handleEditDescription = (nextValue: string) => {
-        /*TO-DO: Implement logic to make a call to the API and update
-        lthe project description.*/
+    const handleEditDescription = async (nextValue: string) => {
         const currentValue = project.description ?? 'Add a description';
         if (nextValue !== currentValue) {
-            toast({
-                title: 'Update the project description',
-                description: `Change the description from ${currentValue} to ${nextValue}`,
-                status: 'info' as StatusType,
-                duration: 4000,
-                isClosable: true
-            });
+            const DTO: UpdateProjectDTO = {
+                id: project.id,
+                description: nextValue
+            }
+            try {
+                const response = await UpdateData(
+                    `/projects/update`,
+                    DTO
+                );
+                if (response) {
+                    project.description = response.data.description;
+                }
+            } catch (error: any) {
+                if(error.response) {
+                    toast({
+                        title: 'Error',
+                        description: error.response.data.message,
+                        status: 'error' as StatusType,
+                        duration: 4000,
+                        isClosable: true
+                    });
+                    if(error.response.data.message.includes('Authorization')) {
+                        navigate('/sign-in');
+                        return;
+                    }
+                } else {
+                    toast({
+                        title: 'Error',
+                        description: error.message,
+                        status: 'error' as StatusType,
+                        duration: 4000,
+                        isClosable: true
+                    });
+                }
+                if(error.message.includes('Authorization')) {
+                    navigate('/sign-in');
+                    return;
+                }
+            }
         }
     }
     

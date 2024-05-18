@@ -16,7 +16,6 @@ import { UserStory } from '../user-stories/user-story.entity';
 import { Task } from '../tasks/task.entity';
 import { List } from '../lists/list.entity';
 
-
 @Module({
     imports: [
         TypeOrmModule.forFeature([Project]),

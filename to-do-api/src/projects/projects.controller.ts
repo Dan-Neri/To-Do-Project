@@ -10,13 +10,15 @@ import {
     Body, 
     UseGuards,
     Request,
-    BadRequestException
+    BadRequestException,
+    UsePipes
 } from '@nestjs/common';
 import { ProjectsService } from './projects.service';
 import { Project } from './project.entity';
 import { List } from '../lists/list.entity';
 import { AuthGuard, RequestWithUser } from '../auth/auth.guard';
 import { CreateProjectDTO } from './create-project.dto';
+import { UpdateProjectDTO } from './update-project.dto';
 
 @Controller('projects')
 export class ProjectsController {
@@ -39,7 +41,7 @@ export class ProjectsController {
     @UseGuards(AuthGuard)
     @Get(':id')
     findByID(
-        @Request() req: RequestWithUser,
+        @Request() req: RequestWithUser, 
         @Param('id') id: string
     ): Promise<Project> {
         return this.projectsService.findByID(req.user.sub, id);
@@ -57,6 +59,18 @@ export class ProjectsController {
         @Body() DTO: CreateProjectDTO
     ): Promise<Project> {
         return this.projectsService.create(req.user.sub, DTO);
+    }
+    
+    /*Take an access token in the request header and a DTO containing
+    project update data in the body. Update the specified information in 
+    the given project.*/
+    @UseGuards(AuthGuard)
+    @Post('/update')
+    update(
+        @Request() req: RequestWithUser,
+        @Body() DTO: UpdateProjectDTO
+    ): Promise<Project> {
+        return this.projectsService.update(req.user.sub, DTO);
     }
     
     /*
