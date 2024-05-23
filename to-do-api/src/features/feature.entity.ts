@@ -17,7 +17,6 @@ import { List } from '../lists/list.entity';
 import { UserStory } from '../user-stories/user-story.entity';
 
 @Entity()
-@Unique(['list', 'position'])
 export class Feature {
     @PrimaryGeneratedColumn('uuid')
     id: string;

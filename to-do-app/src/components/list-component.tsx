@@ -2,7 +2,7 @@
  * The ListComponent is the highest level component in the project
  * workflow and is used to express the state of each feature.
  */
-import React, { FormEvent, useState, useEffect } from 'react';
+import React, { FormEvent, useState, useEffect, useRef } from 'react';
 import { 
     Button,
     Flex,
@@ -20,7 +20,8 @@ import {
     Divider,
     Editable,
     EditableInput,
-    EditablePreview
+    EditablePreview,
+    IconButton
 } from '@chakra-ui/react';
 import { useNavigate, Form } from 'react-router-dom';
 import { 
@@ -33,13 +34,16 @@ import Dialog from '../components/dialog';
 import { UpdateData } from '../api/calls';
 import FeatureComponent from '../components/feature-component';
 import EditableIcon from '../components/editable-icon';
+import { draggable } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
+import { DragHandleIcon } from '@chakra-ui/icons';
 
 interface ListProps {
     id: string;
     projectID: string;
     lists: List[];
     setLists: React.Dispatch<React.SetStateAction<List[]>>;
-    title?: string;
+    title: string;
+    position: number;
 }
 
 const ListComponent = (props: ListProps) => {
@@ -48,7 +52,8 @@ const ListComponent = (props: ListProps) => {
         projectID,
         lists,
         setLists, 
-        title='Add a Title'
+        title,
+        position
     } = props;
     const { isOpen, onOpen, onClose } = useDisclosure();
     const toast = useToast();
@@ -59,12 +64,29 @@ const ListComponent = (props: ListProps) => {
     const [features, setFeatures] = useState(
         list? list.features : []
     );
+    const dragRef = useRef(null);
+    const [dragging, setDragging] = useState(false);
+    const [listIndex, setListIndex] = useState(position);
     
-    //Update features any time the lists state is updated.
+    //Update features and position any time the lists state is updated.
     useEffect(() => {
         const list = lists.find(list => list.id === id);
         setFeatures(list? list.features : []);
-    }, [lists, id])
+        setListIndex(list? list.position : -1);
+    }, [lists, id, position])
+    
+    //Allow the list to be dragged.
+    useEffect(() => {
+        const listDrag = dragRef.current;
+        if (listDrag) {
+            return draggable({
+                element: listDrag,
+                getInitialData: () => ({id, listIndex}),
+                onDragStart: () => setDragging(true),
+                onDrop: () => setDragging(false)
+            });
+        }
+    }, [listIndex]);
     
     //Add a feature to this list.
     const handleAddFeature = async (event: FormEvent<HTMLFormElement>) => {
@@ -215,6 +237,7 @@ const ListComponent = (props: ListProps) => {
             justifyContent='center'
             alignItems='center'
             borderRadius='xl'
+            style={{ opacity: dragging? 0.5 : 1 }}
         >
             <Flex 
                 w='99%'
@@ -225,19 +248,31 @@ const ListComponent = (props: ListProps) => {
             >
                 <Flex
                     w='100%'
-                    justify='center'
+                    justify='space-between'
                     align='center' 
                     bg='cyan.300'
                     borderTopRadius='xl'
                 >
-                    <Editable 
-                        defaultValue={title} 
-                        onSubmit={handleEditTitle}
-                    >
-                        <EditablePreview mr='4px' cursor='pointer' />
-                        <EditableInput />
-                        <EditableIcon ariaLabel='Edit List Title'/>
-                    </Editable>
+                    <Flex justify='center' flexGrow={1}>
+                        <Editable 
+                            defaultValue={title} 
+                            onSubmit={handleEditTitle}
+                        >
+                            <EditablePreview mr='4px' cursor='pointer' />
+                            <EditableInput />
+                            <EditableIcon ariaLabel='Edit List Title'/>
+                        </Editable>
+                    </Flex>
+                    <IconButton 
+                        aria-label='Drag List' 
+                        icon={<DragHandleIcon color='teal.700'/>}
+                        size='xs'
+                        mr='4px'
+                        bg=''
+                        _hover={{ bg: '' }}
+                        _active={{ bg: '' }}
+                        ref={dragRef} 
+                    />
                 </Flex>
                 <Spacer />
                 <VStack 

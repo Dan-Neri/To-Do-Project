@@ -16,7 +16,6 @@ import { Project } from '../projects/project.entity';
 import { Feature } from '../features/feature.entity';
 
 @Entity()
-@Unique(['project', 'position'])
 export class List {
     @PrimaryGeneratedColumn('uuid')
     id: string;

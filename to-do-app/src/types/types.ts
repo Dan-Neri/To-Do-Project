@@ -98,6 +98,7 @@ export interface UpdateListDTO {
     id: string;
     projectID: string;
     title?: string;
+    position?: number;
     features?: Feature[];
 }
 

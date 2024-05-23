@@ -6,7 +6,7 @@
  * sync with the database. The lists state variable is passed to each 
  * subcomponent with a callback to facilitate these updates.
  */
-import { useState, useEffect, PointerEvent } from 'react';
+import React, { useState, useEffect, PointerEvent } from 'react';
 import { 
     Flex, 
     HStack,  
@@ -31,32 +31,28 @@ import {
     Project, 
     UpdateProjectDTO, 
     List, 
-    CreateListDTO 
+    CreateListDTO,
+    UpdateListDTO
 } from '../types/types';
 import { AddIcon } from '@chakra-ui/icons';
 import { EditIcon } from '@chakra-ui/icons';
 import EditableIcon from '../components/editable-icon';
-//import { draggable } from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
+import ListTargetComponent from '../components/list-target-component';
+import { 
+    monitorForElements 
+} from '@atlaskit/pragmatic-drag-and-drop/element/adapter';
 
 export default function ProjectInfo() {
     const toast = useToast();
     const navigate = useNavigate();
-    //const featureRef = useRef(null);
     const project = useLoaderData() as Project;
     /*Track the state all lists which amounts to the entirety of the 
     project workflow data.*/
     const [lists, setLists] = useState<List[]>([]);
     const [title, setTitle] = useState(project.title);
     const [description, setDescription] = useState(project.description);
-
-    /*useEffect(() => {
-        const featureDrag = featureRef.current;
-        if (featureDrag) {
-            return draggable({element: featureDrag});
-        }
-    }, []);*/
     
-    //Sort the lists.
+    //Sort the lists and keep the title and description updated.
     useEffect(() => {
         if (project) {
             const sortedLists = project.lists.slice().sort(
@@ -67,6 +63,98 @@ export default function ProjectInfo() {
             setDescription(project.description);
         }
     }, [project]);
+    
+    //Monitor for dragged components.
+    useEffect(() => {
+        return monitorForElements({
+            onDrop: async ({ source, location }) => {
+                const destination = location.current.dropTargets[0];
+                /*Check to make sure that the list is dropped in a valid
+                location.*/
+                if (!destination) {
+                    return;
+                }
+                //Index of the drop target.
+                let destinationIndex = destination.data.index as number;
+                //Index of the grabbed list.
+                const sourceIndex = source.data.listIndex as number;
+                //Destination index must be adjusted if moving a list forward.
+                destinationIndex = (
+                    destinationIndex > sourceIndex 
+                ) ? (
+                    destinationIndex - 1 
+                ) : (
+                    destinationIndex
+                );
+                //Create a copy of the lists state.
+                const newLists = lists.slice();
+                //Remove the source list from the copy.
+                const movedList = newLists.splice(sourceIndex, 1)[0];
+                //Insert the source list at the chosen destination in the copy.
+                newLists.splice(destinationIndex, 0, movedList);
+                    /*(destinationIndex > sourceIndex) ? (
+                        destinationIndex - 1
+                    ) : ( 
+                        destinationIndex
+                    ), 
+                    0, 
+                    movedList
+                );*/
+                /*Update the position of all lists between the source
+                and destination on both the front and back end.*/
+                for(
+                    let i = Math.min(sourceIndex, destinationIndex); 
+                    i <= Math.max(sourceIndex, destinationIndex); 
+                    i++
+                ) {
+                    //Update the position of this list in the copy.
+                    newLists[i].position = i;
+                    //Create a DTO with the updated position for this list.
+                    const DTO: UpdateListDTO = {
+                        projectID: project.id,
+                        id: newLists[i].id,
+                        position: i
+                    }
+                    try {
+                        /*Send a request to the API to update the position of
+                        this list in the database.*/
+                        const response = await UpdateData('/lists/update', DTO);
+                    } catch (error: any) {
+                        if(error.response) {
+                            toast({
+                                title: 'Error',
+                                description: error.response.data.message,
+                                status: 'error' as StatusType,
+                                duration: 4000,
+                                isClosable: true
+                            });
+                            if(error.response.data.message.includes(
+                                'Authorization'
+                            )) {
+                                navigate('/sign-in');
+                                return;
+                            }
+                        } else {
+                            toast({
+                                title: 'Error',
+                                description: error.message,
+                                status: 'error' as StatusType,
+                                duration: 4000,
+                                isClosable: true
+                            });
+                        }
+                        if(error.message.includes('Authorization')) {
+                            navigate('/sign-in');
+                            return;
+                        }
+                    }
+                }
+                /*Replace the lists state with the copy once all positions
+                have been updated.*/
+                setLists(newLists);
+            }
+        })
+    }, [lists]); 
     
     //Add a list to the project.
     const handleAddList = async (event: PointerEvent<HTMLButtonElement>) => {
@@ -246,18 +334,23 @@ export default function ProjectInfo() {
                 w='100%' 
                 h='100%' 
                 alignItems='flex-start' 
-                spacing='6px' 
+                spacing={0} 
                 ml='4px'
             >
+                <ListTargetComponent key={0} index={0}/>
                 {lists && lists.length > 0 && lists.map((list, index) => (
-                    <ListComponent 
-                        key={list.id}
-                        id={list.id} 
-                        projectID={project.id}
-                        lists={lists}
-                        setLists={setLists}
-                        title={list.title}
-                    />
+                    <React.Fragment key={list.id}>
+                        <ListComponent 
+                            key={list.id}
+                            id={list.id} 
+                            projectID={project.id}
+                            lists={lists}
+                            setLists={setLists}
+                            title={list.title}
+                            position={list.position}
+                        />
+                        <ListTargetComponent key={index+1} index={index+1} />
+                    </React.Fragment>
                 ))}
                 <IconButton 
                     aria-label='Add Column'
